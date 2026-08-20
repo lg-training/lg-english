@@ -131,6 +131,7 @@ button{font-family:inherit}
     <div class="row" id="gSpk"><button class="spk" id="spkBtn" onclick="repeatAudio()">🔊 Escuchar</button></div>
     <div class="opts" id="gOpts"></div>
     <div class="fb" id="gFb"></div>
+    <button class="btn" id="gNext" style="display:none" onclick="nextQ()">Siguiente ▶</button>
   </div>
   <button class="btn ghost" onclick="quit()">← Salir</button>
 </div>
@@ -305,13 +306,13 @@ function hud(){
 }
 function nextQ(){
   if(G.i>=TOTAL||G.lives<=0)return finish();
-  hud();G.locked=false;$('gFb').innerHTML='';
+  hud();G.locked=false;$('gFb').innerHTML='';$('gNext').style.display='none';
   const q=BUILD[G.mode]();G.cur=q;
   $('gQ').innerHTML=q.html;
   $('gOpts').className='opts'+(q.opts.some(o=>o.length>10)?' one':'');
   $('gOpts').innerHTML=q.opts.map((o,k)=>`<button class="opt" data-k="${k}" onclick="answer(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('');
-  if(q.audio)say(q.audio,q.rate||.8);
   paintSpk();
+  if(q.audio)setTimeout(()=>say(q.audio,q.rate||.8),350);
 }
 function answer(el,v){
   if(G.locked)return;G.locked=true;
@@ -335,7 +336,9 @@ function answer(el,v){
     if(q.onOk)q.onOk();
   }
   G.i++;hud();paintSpk();
-  setTimeout(nextQ,good?1800:3000);
+  const nb=$('gNext');
+  nb.textContent = G.i>=TOTAL||G.lives<=0 ? '🏁 Ver resultado' : 'Siguiente ▶';
+  nb.style.display='block';
 }
 function finish(){
   const dead=G.lives<=0, perfect=G.ok===TOTAL;
