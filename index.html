@@ -2,229 +2,349 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>English Practice</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Quest 🎮</title>
 <style>
-  :root { --bg:#0f172a; --card:#1e293b; --acc:#38bdf8; --ok:#22c55e; --bad:#ef4444; --tx:#e2e8f0; }
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--tx); }
-  header { padding:1.2rem; text-align:center; }
-  h1 { margin:0 0 .8rem; font-size:1.5rem; color:var(--acc); }
-  nav { display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap; }
-  nav button { background:var(--card); color:var(--tx); border:2px solid transparent; padding:.6rem 1rem; border-radius:.6rem; cursor:pointer; font-size:1rem; }
-  nav button.active { border-color:var(--acc); color:var(--acc); }
-  main { max-width:720px; margin:0 auto; padding:1rem; }
-  section { display:none; }
-  section.active { display:block; }
-  .card { background:var(--card); padding:1.2rem; border-radius:.8rem; margin-bottom:1rem; }
-  .q { font-size:1.3rem; margin-bottom:1rem; text-align:center; }
-  .opts { display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; }
-  .opts button, .btn { background:#334155; color:var(--tx); border:none; padding:.7rem 1.2rem; border-radius:.6rem; font-size:1.1rem; cursor:pointer; }
-  .opts button:hover, .btn:hover { background:#475569; }
-  .ok { background:var(--ok)!important; }
-  .bad { background:var(--bad)!important; }
-  .msg { text-align:center; margin-top:1rem; min-height:1.6rem; font-weight:600; }
-  .score { text-align:center; opacity:.8; font-size:.9rem; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(78px,1fr)); gap:.4rem; }
-  .grid button { background:#334155; border:none; color:var(--tx); border-radius:.5rem; padding:.5rem .2rem; cursor:pointer; font-size:.8rem; line-height:1.3; }
-  .grid button b { display:block; font-size:1.1rem; color:var(--acc); }
-  .abc { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:.5rem; }
-  .abc button { background:#334155; border:none; color:var(--tx); border-radius:.5rem; padding:.7rem .2rem; cursor:pointer; }
-  .abc button b { display:block; font-size:1.6rem; color:var(--acc); }
-  .abc button span { font-size:.85rem; opacity:.85; }
-  input[type=text] { padding:.7rem; border-radius:.6rem; border:none; font-size:1.1rem; width:140px; text-align:center; }
-  .row { display:flex; gap:.6rem; justify-content:center; align-items:center; flex-wrap:wrap; }
-  footer { text-align:center; padding:1rem; opacity:.5; font-size:.8rem; }
+:root{--bg:#0b1220;--card:#16233a;--card2:#1e2f4d;--acc:#38bdf8;--acc2:#a78bfa;--ok:#22c55e;--bad:#ef4444;--gold:#fbbf24;--tx:#e6edf7;--mut:#8fa3bf}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(1200px 600px at 50% -10%,#1b2b4a,var(--bg));color:var(--tx);min-height:100vh}
+.wrap{max-width:640px;margin:0 auto;padding:1rem}
+h1{font-size:1.6rem;margin:.2rem 0;text-align:center;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{text-align:center;color:var(--mut);font-size:.85rem;margin-bottom:1rem}
+.card{background:var(--card);border:1px solid #24365a;border-radius:1rem;padding:1rem;margin-bottom:.9rem}
+.screen{display:none}.screen.on{display:block}
+button{font-family:inherit}
+.btn{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0b1220;border:none;padding:.8rem 1.4rem;border-radius:.7rem;font-size:1rem;font-weight:700;cursor:pointer;width:100%}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:var(--card2);color:var(--tx);font-weight:600}
+/* stats bar */
+.stats{display:flex;gap:.5rem;margin-bottom:.9rem}
+.stat{flex:1;background:var(--card);border:1px solid #24365a;border-radius:.8rem;padding:.6rem;text-align:center}
+.stat b{display:block;font-size:1.25rem;color:var(--acc)}
+.stat span{font-size:.7rem;color:var(--mut)}
+.lvlbar{height:8px;background:#24365a;border-radius:99px;overflow:hidden;margin-top:.5rem}
+.lvlbar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .4s}
+/* module cards */
+.mod{display:flex;align-items:center;gap:.9rem;cursor:pointer;transition:.15s}
+.mod:hover{border-color:var(--acc);transform:translateY(-2px)}
+.mod .ico{font-size:2rem;width:52px;height:52px;display:grid;place-items:center;background:var(--card2);border-radius:.8rem;flex:none}
+.mod h3{margin:0 0 .2rem;font-size:1.05rem}
+.mod p{margin:0;font-size:.8rem;color:var(--mut)}
+.mod .best{margin-left:auto;text-align:right;font-size:.75rem;color:var(--gold);flex:none}
+/* game */
+.hud{display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;font-size:.95rem}
+.hud .lives{letter-spacing:2px}
+.hud .streak{background:var(--card2);padding:.25rem .6rem;border-radius:99px;font-weight:700;color:var(--gold)}
+.hud .x{margin-left:auto;color:var(--mut);font-size:.8rem}
+.prog{height:10px;background:#24365a;border-radius:99px;overflow:hidden;margin-bottom:1rem}
+.prog i{display:block;height:100%;background:var(--ok);transition:width .3s}
+.q{font-size:1.35rem;text-align:center;margin:1.4rem 0;line-height:1.5;min-height:3rem;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.3rem}
+.q .blank{color:var(--gold);border-bottom:2px dashed var(--gold);padding:0 .8rem}
+.q .big{font-size:3rem;font-weight:800;color:var(--acc)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.opts.one{grid-template-columns:1fr}
+.opt{background:var(--card2);border:2px solid transparent;color:var(--tx);padding:.9rem;border-radius:.7rem;font-size:1.05rem;cursor:pointer;transition:.12s}
+.opt:hover{border-color:var(--acc)}
+.opt.ok{background:var(--ok);color:#052e16;border-color:var(--ok)}
+.opt.bad{background:var(--bad);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.fb{text-align:center;margin-top:1rem;min-height:2.4rem;font-weight:700}
+.fb small{display:block;font-weight:400;color:var(--mut);font-size:.8rem;margin-top:.25rem}
+.spk{background:var(--card2);border:none;color:var(--tx);border-radius:.7rem;padding:.7rem 1rem;cursor:pointer;font-size:1.1rem}
+.row{display:flex;gap:.5rem;justify-content:center;align-items:center;margin-top:.6rem}
+/* medals */
+.medals{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.6rem}
+.medal{background:var(--card2);border-radius:.8rem;padding:.7rem .4rem;text-align:center;opacity:.32;filter:grayscale(1)}
+.medal.got{opacity:1;filter:none;box-shadow:0 0 0 2px var(--gold) inset}
+.medal .m{font-size:1.8rem}
+.medal .n{font-size:.7rem;margin-top:.2rem;line-height:1.2}
+/* toast */
+#toast{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%) translateY(150%);background:var(--gold);color:#3b2600;padding:.7rem 1.1rem;border-radius:.8rem;font-weight:700;transition:.35s;z-index:9;box-shadow:0 8px 24px #0008}
+#toast.on{transform:translateX(-50%) translateY(0)}
+.big-res{text-align:center}
+.big-res .em{font-size:4rem}
+.big-res h2{margin:.3rem 0}
+.pill{display:inline-block;background:var(--card2);padding:.35rem .8rem;border-radius:99px;margin:.2rem;font-size:.85rem}
+@media(max-width:380px){.opts{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header>
-  <h1>🎯 English Practice</h1>
-  <nav>
-    <button data-t="wasWere" class="active">was / were</button>
-    <button data-t="numbers">Numbers 1–100</button>
-    <button data-t="abc">Alphabet</button>
-  </nav>
-</header>
+<div class="wrap">
 
-<main>
-  <!-- WAS / WERE -->
-  <section id="wasWere" class="active">
-    <div class="card">
-      <div class="q" id="wwQ">—</div>
-      <div class="opts">
-        <button onclick="wwAnswer('was',this)">was</button>
-        <button onclick="wwAnswer('were',this)">were</button>
-      </div>
-      <div class="msg" id="wwMsg"></div>
-      <div class="score" id="wwScore"></div>
-    </div>
-    <div class="card">
-      <b>Regla rápida:</b><br>
-      <b>was</b> → I, he, she, it<br>
-      <b>were</b> → you, we, they
-    </div>
-  </section>
+<!-- ============ HOME ============ -->
+<div id="home" class="screen on">
+  <h1>English Quest 🎮</h1>
+  <div class="sub">Juega, gana XP y desbloquea medallas</div>
 
-  <!-- NUMBERS -->
-  <section id="numbers">
-    <div class="card">
-      <div class="q" id="nQ">—</div>
-      <div class="row">
-        <input type="text" id="nIn" placeholder="escribe..." autocomplete="off">
-        <button class="btn" onclick="nCheck()">Check</button>
-        <button class="btn" onclick="nSay()">🔊</button>
-        <button class="btn" onclick="nNew()">Next</button>
-      </div>
-      <div class="msg" id="nMsg"></div>
-      <div class="score" id="nScore"></div>
+  <div class="stats">
+    <div class="stat"><b id="sLvl">1</b><span>NIVEL</span></div>
+    <div class="stat"><b id="sXp">0</b><span>XP</span></div>
+    <div class="stat"><b id="sStreak">0</b><span>MEJOR RACHA</span></div>
+    <div class="stat"><b id="sMed">0</b><span>MEDALLAS</span></div>
+  </div>
+  <div class="card" style="padding:.7rem 1rem">
+    <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--mut)">
+      <span>Nivel <b id="lvlA">1</b></span><span id="lvlTxt">0 / 100 XP</span>
     </div>
-    <div class="card">
-      <b>Tabla 1–100</b> (clic para escuchar)
-      <div class="grid" id="nGrid"></div>
-    </div>
-  </section>
+    <div class="lvlbar"><i id="lvlBar" style="width:0"></i></div>
+  </div>
 
-  <!-- ALPHABET -->
-  <section id="abc">
-    <div class="card">
-      <b>Abecedario</b> — clic en la letra para escuchar la pronunciación
-      <div class="abc" id="abcGrid" style="margin-top:.8rem"></div>
-    </div>
-    <div class="card">
-      <div class="q" id="aQ">Escucha y elige la letra</div>
-      <div class="row"><button class="btn" onclick="aSay()">🔊 Repetir</button></div>
-      <div class="opts" id="aOpts" style="margin-top:1rem"></div>
-      <div class="msg" id="aMsg"></div>
-      <div class="score" id="aScore"></div>
-    </div>
-  </section>
-</main>
+  <div class="card mod" onclick="start('ww')">
+    <div class="ico">📝</div>
+    <div><h3>was / were</h3><p>Verbo "to be" en pasado</p></div>
+    <div class="best">🏆<br><span id="bww">–</span></div>
+  </div>
+  <div class="card mod" onclick="start('num')">
+    <div class="ico">🔢</div>
+    <div><h3>Numbers 1–100</h3><p>Leer, escuchar y reconocer</p></div>
+    <div class="best">🏆<br><span id="bnum">–</span></div>
+  </div>
+  <div class="card mod" onclick="start('abc')">
+    <div class="ico">🔤</div>
+    <div><h3>Alphabet</h3><p>Pronunciación del abecedario</p></div>
+    <div class="best">🏆<br><span id="babc">–</span></div>
+  </div>
+  <div class="card mod" onclick="start('mix')">
+    <div class="ico">🎲</div>
+    <div><h3>Modo Mixto</h3><p>¡Todo mezclado! Doble XP</p></div>
+    <div class="best">🏆<br><span id="bmix">–</span></div>
+  </div>
 
-<footer>Hecho con ❤️ para practicar inglés</footer>
+  <div class="card">
+    <h3 style="margin:.1rem 0 .8rem">🏅 Medallas</h3>
+    <div class="medals" id="medalGrid"></div>
+  </div>
+  <button class="btn ghost" onclick="resetAll()">🗑️ Reiniciar progreso</button>
+  <div style="height:1.5rem"></div>
+</div>
+
+<!-- ============ GAME ============ -->
+<div id="game" class="screen">
+  <div class="hud">
+    <span class="lives" id="hLives">❤️❤️❤️</span>
+    <span class="streak" id="hStreak">🔥 0</span>
+    <span class="x" id="hCount">1/10</span>
+  </div>
+  <div class="prog"><i id="hProg" style="width:0"></i></div>
+  <div class="card">
+    <div class="q" id="gQ">—</div>
+    <div class="row" id="gSpk" style="display:none"><button class="spk" onclick="repeatAudio()">🔊 Escuchar otra vez</button></div>
+    <div class="opts" id="gOpts"></div>
+    <div class="fb" id="gFb"></div>
+  </div>
+  <button class="btn ghost" onclick="quit()">← Salir</button>
+</div>
+
+<!-- ============ RESULT ============ -->
+<div id="result" class="screen">
+  <div class="card big-res">
+    <div class="em" id="rEmoji">🎉</div>
+    <h2 id="rTitle">¡Ronda completa!</h2>
+    <div id="rPills"></div>
+    <div style="height:1rem"></div>
+    <button class="btn" onclick="start(last.mode)">🔁 Jugar otra vez</button>
+    <div style="height:.5rem"></div>
+    <button class="btn ghost" onclick="go('home')">🏠 Menú</button>
+  </div>
+</div>
+
+</div>
+<div id="toast"></div>
 
 <script>
-/* ---------- utils ---------- */
-const $ = id => document.getElementById(id);
-const rnd = a => a[Math.floor(Math.random()*a.length)];
-function say(text, rate=.85){
-  if(!window.speechSynthesis) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang='en-US'; u.rate=rate;
-  speechSynthesis.speak(u);
-}
+/* ================= helpers ================= */
+const $=id=>document.getElementById(id);
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const shuffle=a=>a.slice().sort(()=>Math.random()-.5);
+let lastAudio='';
+function say(t,rate=.85){lastAudio=t;if(!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=rate;speechSynthesis.speak(u);}
+function repeatAudio(){if(lastAudio)say(lastAudio,.75);}
+let toastQ=[],toastBusy=false;
+function toast(msg){toastQ.push(msg);if(!toastBusy)runToast();}
+function runToast(){if(!toastQ.length){toastBusy=false;return}toastBusy=true;$('toast').textContent=toastQ.shift();$('toast').classList.add('on');setTimeout(()=>{$('toast').classList.remove('on');setTimeout(runToast,320)},1900);}
+function go(s){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('on'));$(s).classList.add('on');window.scrollTo(0,0);}
 
-/* ---------- tabs ---------- */
-document.querySelectorAll('nav button').forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('section').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active'); $(b.dataset.t).classList.add('active');
-  };
-});
+/* ================= save data ================= */
+const KEY='englishQuest.v1';
+const DEF={xp:0,best:0,totalOk:0,rounds:0,perfect:0,medals:[],high:{ww:0,num:0,abc:0,mix:0},done:{ww:0,num:0,abc:0,mix:0}};
+let S=Object.assign({},DEF,JSON.parse(localStorage.getItem(KEY)||'{}'));
+const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
+function resetAll(){if(confirm('¿Borrar todo el progreso?')){S=JSON.parse(JSON.stringify(DEF));save();paintHome();}}
 
-/* ---------- WAS / WERE ---------- */
-const wwData = [
-  ["I ___ at school yesterday.","was"],
-  ["She ___ very happy.","was"],
-  ["They ___ playing football.","were"],
-  ["We ___ at the park.","were"],
-  ["He ___ my best friend.","was"],
-  ["You ___ late today.","were"],
-  ["It ___ a sunny day.","was"],
-  ["My parents ___ tired.","were"],
-  ["The cat ___ on the sofa.","was"],
-  ["The children ___ in the garden.","were"],
-  ["I ___ not hungry.","was"],
-  ["You and Tom ___ at the cinema.","were"],
-  ["The book ___ interesting.","was"],
-  ["There ___ many people.","were"],
-  ["There ___ a big dog.","was"],
-  ["Anna and I ___ classmates.","were"],
-  ["My teacher ___ very kind.","was"],
-  ["The shoes ___ too small.","were"],
-  ["It ___ cold last night.","was"],
-  ["We ___ born in 2015.","were"]
+const MEDALS=[
+ {id:'first',m:'🌟',n:'Primera ronda',ck:()=>S.rounds>=1},
+ {id:'s5',m:'🔥',n:'Racha de 5',ck:()=>S.best>=5},
+ {id:'s10',m:'⚡',n:'Racha de 10',ck:()=>S.best>=10},
+ {id:'perfect',m:'💎',n:'Ronda perfecta',ck:()=>S.perfect>=1},
+ {id:'p3',m:'👑',n:'3 perfectas',ck:()=>S.perfect>=3},
+ {id:'xp250',m:'🚀',n:'250 XP',ck:()=>S.xp>=250},
+ {id:'xp1000',m:'🌈',n:'1000 XP',ck:()=>S.xp>=1000},
+ {id:'ok100',m:'🧠',n:'100 aciertos',ck:()=>S.totalOk>=100},
+ {id:'mww',m:'📝',n:'Master was/were',ck:()=>S.done.ww>=5},
+ {id:'mnum',m:'🔢',n:'Master Numbers',ck:()=>S.done.num>=5},
+ {id:'mabc',m:'🔤',n:'Master Alphabet',ck:()=>S.done.abc>=5},
+ {id:'mmix',m:'🎲',n:'Master Mixto',ck:()=>S.done.mix>=5},
 ];
-let ww={i:null,ok:0,n:0};
-function wwNew(){
-  ww.i = rnd(wwData);
-  $('wwQ').textContent = ww.i[0];
-  $('wwMsg').textContent='';
-  document.querySelectorAll('#wasWere .opts button').forEach(b=>b.className='');
-}
-function wwAnswer(v,el){
-  ww.n++;
-  if(v===ww.i[1]){ ww.ok++; el.classList.add('ok'); $('wwMsg').textContent='✅ ¡Correcto!';
-    say(ww.i[0].replace('___',ww.i[1]));
-    setTimeout(wwNew,1400);
-  } else { el.classList.add('bad'); $('wwMsg').textContent='❌ Es "'+ww.i[1]+'"';
-    setTimeout(wwNew,1800);
-  }
-  $('wwScore').textContent = `Aciertos: ${ww.ok} / ${ww.n}`;
+function checkMedals(){MEDALS.forEach(md=>{if(!S.medals.includes(md.id)&&md.ck()){S.medals.push(md.id);toast('🏅 ¡Medalla! '+md.n)}});save();}
+const lvlOf=xp=>Math.floor(xp/100)+1;
+
+function paintHome(){
+  $('sLvl').textContent=lvlOf(S.xp);$('sXp').textContent=S.xp;
+  $('sStreak').textContent=S.best;$('sMed').textContent=S.medals.length;
+  $('lvlA').textContent=lvlOf(S.xp);
+  const into=S.xp%100;$('lvlTxt').textContent=into+' / 100 XP';$('lvlBar').style.width=into+'%';
+  ['ww','num','abc','mix'].forEach(k=>$('b'+k).textContent=S.high[k]?S.high[k]+'/10':'–');
+  $('medalGrid').innerHTML=MEDALS.map(m=>
+    `<div class="medal ${S.medals.includes(m.id)?'got':''}"><div class="m">${m.m}</div><div class="n">${m.n}</div></div>`).join('');
 }
 
-/* ---------- NUMBERS ---------- */
-const ones=["zero","one","two","three","four","five","six","seven","eight","nine","ten",
-"eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+/* ================= content ================= */
+const ones=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
 const tens=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
-function toWords(n){
-  if(n===100) return "one hundred";
-  if(n<20) return ones[n];
-  const t=Math.floor(n/10), u=n%10;
-  return u? tens[t]+"-"+ones[u] : tens[t];
-}
-let num={v:1,ok:0,n:0};
-function nNew(){
-  num.v = 1+Math.floor(Math.random()*100);
-  $('nQ').textContent = num.v;
-  $('nIn').value=''; $('nMsg').textContent=''; $('nIn').focus();
-}
-function nSay(){ say(toWords(num.v)); }
-function nCheck(){
-  const g = $('nIn').value.trim().toLowerCase().replace(/\s+/g,'-');
-  if(!g) return;
-  num.n++;
-  if(g===toWords(num.v)){ num.ok++; $('nMsg').textContent='✅ ¡Muy bien!'; say(toWords(num.v)); setTimeout(nNew,1300); }
-  else { $('nMsg').textContent='❌ Es "'+toWords(num.v)+'"'; say(toWords(num.v)); setTimeout(nNew,2200); }
-  $('nScore').textContent = `Aciertos: ${num.ok} / ${num.n}`;
-}
-$('nIn').addEventListener('keydown',e=>{ if(e.key==='Enter') nCheck(); });
-(function buildGrid(){
-  let h='';
-  for(let i=1;i<=100;i++) h+=`<button onclick="say('${toWords(i)}')"><b>${i}</b>${toWords(i)}</button>`;
-  $('nGrid').innerHTML=h;
-})();
+const w=n=>n===100?"one hundred":n<20?ones[n]:(n%10?tens[n/10|0]+"-"+ones[n%10]:tens[n/10|0]);
 
-/* ---------- ALPHABET ---------- */
-const alpha=[["A","ei"],["B","bi"],["C","si"],["D","di"],["E","i"],["F","ef"],["G","yi"],
-["H","eich"],["I","ai"],["J","yei"],["K","kei"],["L","el"],["M","em"],["N","en"],["O","ou"],
-["P","pi"],["Q","kiu"],["R","ar"],["S","es"],["T","ti"],["U","iu"],["V","vi"],
-["W","dábliu"],["X","eks"],["Y","uai"],["Z","zi"]];
-$('abcGrid').innerHTML = alpha.map(([l,p])=>
-  `<button onclick="say('${l}',.7)"><b>${l}</b><span>${p}</span></button>`).join('');
+const WW=[
+["I ___ at school yesterday.","was","I → was"],
+["She ___ very happy.","was","she → was"],
+["They ___ playing football.","were","they → were"],
+["We ___ at the park.","were","we → were"],
+["He ___ my best friend.","was","he → was"],
+["You ___ late today.","were","you → were"],
+["It ___ a sunny day.","was","it → was"],
+["My parents ___ tired.","were","plural → were"],
+["The cat ___ on the sofa.","was","singular → was"],
+["The children ___ in the garden.","were","plural → were"],
+["Tom and I ___ classmates.","were","'and I' = we → were"],
+["The book ___ interesting.","was","singular → was"],
+["There ___ many people.","were","many people → were"],
+["There ___ a big dog.","was","a dog → was"],
+["My teacher ___ very kind.","was","singular → was"],
+["The shoes ___ too small.","were","shoes = plural → were"],
+["It ___ cold last night.","was","it → was"],
+["We ___ born in 2015.","were","we → were"],
+["The music ___ too loud.","was","music → was"],
+["You and Ana ___ at the cinema.","were","you+Ana = you → were"],
+["My dog ___ hungry.","was","singular → was"],
+["The windows ___ open.","were","plural → were"],
+["I ___ not scared.","was","I → was"],
+["They ___ not at home.","were","they → were"],
+["Where ___ you last night?","were","you → were"],
+["Where ___ he yesterday?","was","he → was"],
+["The pizza ___ delicious.","was","singular → was"],
+["My friends ___ very funny.","were","plural → were"],
+["The exam ___ difficult.","was","singular → was"],
+["We ___ in Spain last summer.","were","we → were"]
+];
+const ABC=[["A","ei"],["B","bi"],["C","si"],["D","di"],["E","i"],["F","ef"],["G","yi"],["H","eich"],["I","ai"],["J","yei"],["K","kei"],["L","el"],["M","em"],["N","en"],["O","ou"],["P","pi"],["Q","kiu"],["R","ar"],["S","es"],["T","ti"],["U","iu"],["V","vi"],["W","dábliu"],["X","eks"],["Y","uai"],["Z","zi"]];
 
-let a={l:null,ok:0,n:0};
-function aNew(){
-  a.l = rnd(alpha);
-  const opts=[a.l];
-  while(opts.length<4){ const c=rnd(alpha); if(!opts.includes(c)) opts.push(c); }
-  opts.sort(()=>Math.random()-.5);
-  $('aOpts').innerHTML = opts.map(o=>`<button onclick="aAnswer('${o[0]}',this)">${o[0]}</button>`).join('');
-  $('aMsg').textContent='';
-  aSay();
+/* ================= question builders ================= */
+function qWW(){
+  const [s,ans,tip]=rnd(WW);
+  return{html:s.replace('___','<span class="blank">?</span>'),opts:['was','were'],ans,tip,
+    onOk:()=>say(s.replace('___',ans))};
 }
-function aSay(){ if(a.l) say(a.l,.7); }
-function aAnswer(v,el){
-  a.n++;
-  if(v===a.l[0]){ a.ok++; el.classList.add('ok'); $('aMsg').textContent='✅ ¡Correcto!'; setTimeout(aNew,1200); }
-  else { el.classList.add('bad'); $('aMsg').textContent='❌ Era "'+a.l[0]+'" ('+a.l[1]+')'; setTimeout(aNew,1800); }
-  $('aScore').textContent = `Aciertos: ${a.ok} / ${a.n}`;
+function qNum(){
+  const t=ri(1,3), n=ri(1,100);
+  if(t===1){ // número → palabra
+    const o=new Set([w(n)]);while(o.size<4)o.add(w(ri(1,100)));
+    return{html:`<span class="big">${n}</span>`,opts:shuffle([...o]),ans:w(n),tip:`${n} = ${w(n)}`,onOk:()=>say(w(n))};
+  }
+  if(t===2){ // palabra → número
+    const o=new Set([String(n)]);while(o.size<4)o.add(String(ri(1,100)));
+    return{html:`<b>${w(n)}</b>`,opts:shuffle([...o]),ans:String(n),tip:`${w(n)} = ${n}`,onOk:()=>say(w(n))};
+  }
+  // escuchar → número
+  const o=new Set([String(n)]);while(o.size<4)o.add(String(ri(1,100)));
+  return{html:'🎧 ¿Qué número escuchas?',opts:shuffle([...o]),ans:String(n),tip:`Era ${n} = ${w(n)}`,audio:w(n),onOk:()=>say(w(n))};
+}
+function qAbc(){
+  const t=ri(1,3), [L,P]=rnd(ABC);
+  if(t===1){ // escuchar → letra
+    const o=new Set([L]);while(o.size<4)o.add(rnd(ABC)[0]);
+    return{html:'🎧 ¿Qué letra escuchas?',opts:shuffle([...o]),ans:L,tip:`Era ${L} (se dice "${P}")`,audio:L,rate:.6,onOk:()=>say(L,.6)};
+  }
+  if(t===2){ // letra → pronunciación
+    const o=new Set([P]);while(o.size<4)o.add(rnd(ABC)[1]);
+    return{html:`¿Cómo se pronuncia <span class="big">${L}</span>?`,opts:shuffle([...o]),ans:P,tip:`${L} se dice "${P}"`,onOk:()=>say(L,.6)};
+  }
+  // siguiente letra
+  const i=ri(0,24),cur=ABC[i][0],nx=ABC[i+1][0];
+  const o=new Set([nx]);while(o.size<4)o.add(rnd(ABC)[0]);
+  return{html:`¿Qué letra va después de <span class="big">${cur}</span>?`,opts:shuffle([...o]),ans:nx,tip:`Después de ${cur} va ${nx}`,onOk:()=>say(cur+' '+nx,.6)};
+}
+const BUILD={ww:qWW,num:qNum,abc:qAbc,mix:()=>rnd([qWW,qNum,qAbc])()};
+const NAME={ww:'was / were',num:'Numbers',abc:'Alphabet',mix:'Modo Mixto'};
+
+/* ================= game engine ================= */
+const TOTAL=10;
+let G={},last={mode:'ww'};
+function start(mode){
+  last.mode=mode;
+  G={mode,i:0,ok:0,lives:3,streak:0,xp:0,cur:null,locked:false};
+  go('game');nextQ();
+}
+function quit(){if(confirm('¿Salir de la ronda? Perderás el progreso.'))go('home');}
+function hud(){
+  $('hLives').textContent='❤️'.repeat(G.lives)+'🖤'.repeat(3-G.lives);
+  $('hStreak').textContent='🔥 '+G.streak;
+  $('hCount').textContent=Math.min(G.i+1,TOTAL)+'/'+TOTAL;
+  $('hProg').style.width=(G.i/TOTAL*100)+'%';
+}
+function nextQ(){
+  if(G.i>=TOTAL||G.lives<=0)return finish();
+  hud();G.locked=false;$('gFb').innerHTML='';
+  const q=BUILD[G.mode]();G.cur=q;
+  $('gQ').innerHTML=q.html;
+  $('gOpts').className='opts'+(q.opts.some(o=>o.length>10)?' one':'');
+  $('gOpts').innerHTML=q.opts.map((o,k)=>`<button class="opt" data-k="${k}" onclick="answer(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('');
+  if(q.audio){$('gSpk').style.display='flex';say(q.audio,q.rate||.8);}
+  else{$('gSpk').style.display='none';}
+}
+function answer(el,v){
+  if(G.locked)return;G.locked=true;
+  const q=G.cur,good=v===q.ans;
+  [...$('gOpts').children].forEach(b=>{b.disabled=true;if(b.textContent===q.ans)b.classList.add('ok')});
+  if(good){
+    el.classList.add('ok');
+    G.ok++;G.streak++;
+    const mult=G.mode==='mix'?2:1;
+    const bonus=G.streak>=5?5:G.streak>=3?2:0;
+    const gain=(10+bonus)*mult;
+    G.xp+=gain;
+    S.totalOk++;if(G.streak>S.best)S.best=G.streak;
+    $('gFb').innerHTML=`<span style="color:var(--ok)">✅ ¡Correcto! +${gain} XP</span>`+
+      (G.streak>=3?`<small>🔥 Racha de ${G.streak} — ¡bonus!</small>`:'');
+    if(q.onOk)q.onOk();
+  }else{
+    el.classList.add('bad');
+    G.streak=0;G.lives--;
+    $('gFb').innerHTML=`<span style="color:var(--bad)">❌ Era "${q.ans}"</span><small>${q.tip||''}</small>`;
+    if(q.onOk)q.onOk();
+  }
+  G.i++;hud();
+  setTimeout(nextQ,good?1200:2200);
+}
+function finish(){
+  const dead=G.lives<=0, perfect=G.ok===TOTAL;
+  S.xp+=G.xp;S.rounds++;S.done[G.mode]=(S.done[G.mode]||0)+1;
+  if(perfect)S.perfect++;
+  if(G.ok>(S.high[G.mode]||0))S.high[G.mode]=G.ok;
+  const before=S.medals.length;save();checkMedals();paintHome();
+  $('rEmoji').textContent=perfect?'💎':dead?'💪':G.ok>=7?'🎉':'🙂';
+  $('rTitle').textContent=perfect?'¡PERFECTO!':dead?'¡Casi! Sigue intentando':G.ok>=7?'¡Muy bien!':'¡Buen intento!';
+  $('rPills').innerHTML=[
+    `<span class="pill">${NAME[G.mode]}</span>`,
+    `<span class="pill">✅ ${G.ok}/${TOTAL}</span>`,
+    `<span class="pill">⭐ +${G.xp} XP</span>`,
+    `<span class="pill">🔥 Mejor racha: ${S.best}</span>`,
+    S.medals.length>before?`<span class="pill">🏅 +${S.medals.length-before} medalla(s)</span>`:''
+  ].join('');
+  go('result');
 }
 
 /* init */
-wwNew(); nNew(); aNew();
+checkMedals();paintHome();
 </script>
 </body>
 </html>
