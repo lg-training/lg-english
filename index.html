@@ -72,6 +72,8 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
 .spd{display:flex;gap:.4rem;margin-top:.4rem}
 .spd button{flex:1;background:var(--card2);border:1px solid #24365a;color:var(--mut);padding:.55rem .3rem;border-radius:.6rem;font-size:.85rem;cursor:pointer;font-family:inherit}
 .spd button.on{border-color:var(--acc);color:var(--acc);background:#24365a}
+.spd.mini button{padding:.35rem .2rem;font-size:1rem;line-height:1.1}
+.spd.mini{margin-top:.5rem}
 /* ---- karaoke ---- */
 #kar{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%) translateY(160%);z-index:30;transition:transform .28s cubic-bezier(.3,1.4,.5,1);pointer-events:none;width:max-content;max-width:92vw}
 #kar.on{transform:translateX(-50%) translateY(0)}
@@ -175,11 +177,7 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
       <button class="spk" onclick="say('Hello! I am ready to practice English with you.')">▶︎ Probar</button>
     </div>
     <div style="margin-top:.9rem;font-size:.8rem;color:var(--mut)">Velocidad</div>
-    <div class="spd">
-      <button data-v="0.7" onclick="setSpeed(0.7,this)">🐢 Lenta</button>
-      <button data-v="0.85" onclick="setSpeed(0.85,this)">🚶 Media</button>
-      <button data-v="1" onclick="setSpeed(1,this)">🐇 Normal</button>
-    </div>
+    <div class="spd" id="spdHome"></div>
   </div>
   <button class="btn ghost" onclick="resetAll()">🗑️ Reiniciar progreso</button>
   <div style="height:1.5rem"></div>
@@ -196,6 +194,7 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
   <div class="card">
     <div class="q" id="gQ">—</div>
     <div class="row" id="gSpk"><button class="spk" id="spkBtn" onclick="repeatAudio()">🔊 Escuchar</button><button class="spk" id="spkSlow" onclick="repeatAudio(1)">🐢 Despacio</button></div>
+  <div class="spd mini" id="spdGame"></div>
     <div class="opts" id="gOpts"></div>
     <div class="fb" id="gFb"></div>
     <button class="btn" id="gNext" style="display:none" onclick="nextQ()">Siguiente ▶</button>
@@ -228,7 +227,8 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
   <div class="sheet">
     <div class="shead">
       <b>📖 Modo Repaso</b>
-      <button class="xbtn" onclick="closeHelp()">✕</button>
+      <div class="spd mini" id="spdHelp" style="margin:0 .6rem 0 auto;max-width:150px"></div>
+      <button class="xbtn" onclick="closeHelp()" style="margin:0">✕</button>
     </div>
     <div class="htabs">
       <button class="on" onclick="hTab('hNum',this)">🔢 Números</button>
@@ -295,16 +295,22 @@ const BAD=/albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|je
 const PREF=['samantha','google us english','microsoft aria','microsoft jenny','microsoft guy','ava','allison','susan','karen','daniel','alex','moira','tessa','serena','google uk english female'];
 let VOICES=[],voice=null;
 let SPEED=parseFloat(localStorage.getItem('eq.speed')||'1');
-function setSpeed(v,el){
-  SPEED=v;localStorage.setItem('eq.speed',v);
-  document.querySelectorAll('.spd button').forEach(b=>b.classList.remove('on'));
-  if(el)el.classList.add('on');
-  say('Hello! This is my speed.');
+const SPD=[[0.7,'🐢','Lenta'],[0.85,'🚶','Media'],[1,'🐇','Normal']];
+function spdHTML(size){
+  return SPD.map(([v,ic,n])=>
+    `<button data-v="${v}" onclick="setSpeed(${v})">${ic}${size==='mini'?'':' '+n}</button>`).join('');
 }
 function paintSpeed(){
-  const b=document.querySelectorAll('.spd button');
-  if(!b.length)return;
-  b.forEach(x=>x.classList.toggle('on',parseFloat(x.dataset.v)===SPEED));
+  document.querySelectorAll('.spd button').forEach(b=>
+    b.classList.toggle('on',parseFloat(b.dataset.v)===SPEED));
+}
+function setSpeed(v){
+  SPEED=v;localStorage.setItem('eq.speed',v);paintSpeed();
+  /* feedback inmediato: si estamos jugando repetimos lo actual, si no una frase de muestra */
+  const q=G&&G.cur;
+  const t=q?(G.locked?(q.speakAfter||q.speak||q.audio):(q.speak||q.audio)):null;
+  if(t&&$('game').classList.contains('on'))sayKaraoke(t,q.rate||.9);
+  else say('Hello! This is my speed.');
 }
 function loadVoices(){
   VOICES=(speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang)&&!BAD.test(v.name));
@@ -542,7 +548,6 @@ function buildHelp(){
     const full=s.replace('___',a);
     return `<button class="wwline" onclick="say('${full.replace(/'/g,"\\'")}')">🔊 ${s.replace('___','<b>'+a+'</b>')}</button>`;
   }).join('');
-  paintSpeed();
 }
 function filterNums(q){
   q=(q||'').trim().toLowerCase();
@@ -682,6 +687,10 @@ function finish(){
 }
 
 /* init */
+$('spdHome').innerHTML=spdHTML();
+$('spdGame').innerHTML=spdHTML('mini');
+$('spdHelp').innerHTML=spdHTML('mini');
+paintSpeed();
 checkMedals();paintHome();
 
 /* ================= auto-actualización =================
