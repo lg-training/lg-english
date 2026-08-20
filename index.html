@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>English Quest 🎮</title>
 <style>
 :root{--bg:#0b1220;--card:#16233a;--card2:#1e2f4d;--acc:#38bdf8;--acc2:#a78bfa;--ok:#22c55e;--bad:#ef4444;--gold:#fbbf24;--tx:#e6edf7;--mut:#8fa3bf}
@@ -564,6 +567,41 @@ function finish(){
 
 /* init */
 checkMedals();paintHome();
+
+/* ================= auto-actualización =================
+   El workflow escribe version.txt con el SHA del commit.
+   Comparamos contra el guardado; si cambió, recargamos sin caché. */
+const BUILDKEY='eq.build';
+let pendingUpdate=false;
+async function checkVersion(){
+  try{
+    const r=await fetch('version.txt?_='+Date.now(),{cache:'no-store'});
+    if(!r.ok)return;
+    const v=(await r.text()).trim();
+    if(!v)return;
+    const prev=localStorage.getItem(BUILDKEY);
+    if(!prev){localStorage.setItem(BUILDKEY,v);return;}
+    if(prev===v)return;
+    localStorage.setItem(BUILDKEY,v);           // guardamos antes de recargar: evita bucle
+    if($('game').classList.contains('on')){      // no interrumpir una partida
+      pendingUpdate=true;
+      toast('✨ Nueva versión — se aplicará al terminar');
+    }else{
+      toast('✨ Actualizando a la nueva versión…');
+      setTimeout(()=>location.reload(),1200);
+    }
+  }catch(e){/* offline o en local: se ignora */}
+}
+const _go=go;
+go=function(s){                                  // al volver al menú aplicamos la actualización
+  _go(s);
+  if(pendingUpdate&&s==='home'){toast('✨ Actualizando…');setTimeout(()=>location.reload(),1200);}
+};
+checkVersion();
+setInterval(checkVersion,5*60*1000);                       // cada 5 min
+document.addEventListener('visibilitychange',()=>{         // y al volver a la pestaña
+  if(!document.hidden)checkVersion();
+});
 </script>
 </body>
 </html>
