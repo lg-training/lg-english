@@ -75,8 +75,6 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
 .spd.mini button{padding:.35rem .2rem;font-size:1rem;line-height:1.1}
 .spd.mini{margin-top:.5rem}
 #spdGame{margin-top:1rem}
-#spdGame button{padding:.7rem .3rem;font-size:1.4rem;line-height:1.2}
-#spdGame button.on{box-shadow:0 0 0 1px var(--acc) inset}
 .spdhint{text-align:center;font-size:.75rem;color:var(--mut);margin-top:.45rem}
 /* ---- karaoke ---- */
 #kar{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%) translateY(160%);z-index:30;transition:transform .28s cubic-bezier(.3,1.4,.5,1);pointer-events:none;width:max-content;max-width:92vw}
@@ -197,7 +195,7 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
   <div class="prog"><i id="hProg" style="width:0"></i></div>
   <div class="card">
     <div class="q" id="gQ">—</div>
-    <div class="spd" id="spdGame"></div>
+    <div class="spd mini" id="spdGame"></div>
   <div class="spdhint" id="spdHint">Toca para escuchar a esa velocidad</div>
     <div class="opts" id="gOpts"></div>
     <div class="fb" id="gFb"></div>
@@ -691,7 +689,7 @@ function finish(){
 
 /* init */
 $('spdHome').innerHTML=spdHTML();
-$('spdGame').innerHTML=spdHTML();
+$('spdGame').innerHTML=spdHTML('mini');
 $('spdHelp').innerHTML=spdHTML('mini');
 paintSpeed();
 checkMedals();paintHome();
