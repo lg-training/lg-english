@@ -72,6 +72,13 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
 .spd{display:flex;gap:.4rem;margin-top:.4rem}
 .spd button{flex:1;background:var(--card2);border:1px solid #24365a;color:var(--mut);padding:.55rem .3rem;border-radius:.6rem;font-size:.85rem;cursor:pointer;font-family:inherit}
 .spd button.on{border-color:var(--acc);color:var(--acc);background:#24365a}
+/* ---- karaoke ---- */
+#kar{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%) translateY(160%);z-index:30;transition:transform .28s cubic-bezier(.3,1.4,.5,1);pointer-events:none;width:max-content;max-width:92vw}
+#kar.on{transform:translateX(-50%) translateY(0)}
+.kbox{background:#0d1729f2;border:1px solid var(--acc);border-radius:.9rem;padding:.8rem 1rem;box-shadow:0 10px 30px #000a;display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center}
+.kw{font-size:1.15rem;color:var(--mut);padding:.15rem .35rem;border-radius:.4rem;transition:.15s}
+.kw.said{color:var(--tx)}
+.kw.now{color:#052e16;background:var(--acc);transform:scale(1.14);font-weight:700}
 /* ---- help overlay ---- */
 #help{position:fixed;inset:0;background:#050a14e0;backdrop-filter:blur(3px);z-index:20;display:none}
 #help.on{display:block}
@@ -214,6 +221,7 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
 
 </div>
 <div id="toast"></div>
+<div id="kar"><div class="kbox" id="kbox"></div></div>
 
 <!-- ============ HELP OVERLAY ============ -->
 <div id="help">
@@ -336,12 +344,64 @@ function saySlow(t,rate=.9){
   say(spaced,rate);
   SPEED=keep;
 }
+/* ================= karaoke =================
+   Resalta cada palabra según la va pronunciando la voz.
+   Usa el evento onboundary; si el navegador no lo dispara
+   (Safari a veces no lo hace) cae a un temporizador estimado. */
+let karTimers=[];
+function karClear(){karTimers.forEach(clearTimeout);karTimers=[];}
+function karHide(){karClear();$('kar').classList.remove('on');}
+function sayKaraoke(text,rate=.9,slow=false){
+  if(!window.speechSynthesis)return;
+  speechSynthesis.cancel();karClear();
+
+  const spoken = slow ? String(text).trim().split(/\s+/).join(', ') : String(text);
+  const words=[];                                   // {w, start, end} sobre `spoken`
+  const re=/[^\s,]+/g;let m;
+  while((m=re.exec(spoken))!==null)words.push({w:m[0].replace(/[.,!?]$/,''),start:m.index,end:m.index+m[0].length});
+
+  $('kbox').innerHTML=words.map((o,i)=>`<span class="kw" data-i="${i}">${o.w}</span>`).join('');
+  const chips=[...$('kbox').children];
+  $('kar').classList.add('on');
+  const mark=i=>chips.forEach((c,k)=>{c.classList.toggle('now',k===i);c.classList.toggle('said',k<i)});
+
+  const u=new SpeechSynthesisUtterance(spoken);
+  if(voice){u.voice=voice;u.lang=voice.lang;}else u.lang='en-US';
+  const eff=Math.max(.5,Math.min(1.3,rate*(slow?.7:SPEED)));
+  u.rate=eff;u.pitch=1;u.volume=1;
+
+  let gotBoundary=false;
+  u.onboundary=e=>{
+    if(e.name&&e.name!=='word')return;
+    gotBoundary=true;
+    let i=words.findIndex(o=>e.charIndex>=o.start&&e.charIndex<o.end);
+    if(i<0)i=words.findIndex(o=>o.start>=e.charIndex);
+    if(i>=0)mark(i);
+  };
+  u.onend=()=>{chips.forEach(c=>{c.classList.remove('now');c.classList.add('said')});karTimers.push(setTimeout(karHide,900));};
+  u.onerror=karHide;
+
+  /* fallback: si a los 350ms no hubo boundary, repartimos por longitud de palabra */
+  karTimers.push(setTimeout(()=>{
+    if(gotBoundary)return;
+    const total=words.reduce((s,o)=>s+o.w.length+2,0);
+    const ms=(total/ (12*eff))*1000;                // ~12 caracteres por segundo a rate 1
+    let acc=0;
+    words.forEach((o,i)=>{
+      karTimers.push(setTimeout(()=>mark(i),acc));
+      acc+=ms*((o.w.length+2)/total);
+    });
+    karTimers.push(setTimeout(karHide,acc+700));
+  },350));
+
+  speechSynthesis.speak(u);
+}
 /* botón 🔊: reproduce lo que sea seguro escuchar en cada momento */
 function repeatAudio(slow){
   const q=G.cur;if(!q)return;
   const t=G.locked?(q.speakAfter||q.speak||q.audio):(q.speak||q.audio);
   if(!t)return;
-  slow?saySlow(t,q.rate||.9):say(t,q.rate||.9);
+  sayKaraoke(t,q.rate||.9,!!slow);
 }
 function paintSpk(){
   const q=G.cur;if(!q)return;
@@ -357,7 +417,7 @@ function paintSpk(){
 let toastQ=[],toastBusy=false;
 function toast(msg){toastQ.push(msg);if(!toastBusy)runToast();}
 function runToast(){if(!toastQ.length){toastBusy=false;return}toastBusy=true;$('toast').textContent=toastQ.shift();$('toast').classList.add('on');setTimeout(()=>{$('toast').classList.remove('on');setTimeout(runToast,320)},1900);}
-function go(s){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('on'));$(s).classList.add('on');window.scrollTo(0,0);}
+function go(s){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('on'));$(s).classList.add('on');window.scrollTo(0,0);if(window.karHide)karHide();}
 
 /* ================= save data ================= */
 const KEY='englishQuest.v1';
@@ -561,7 +621,7 @@ function hud(){
 }
 function nextQ(){
   if(G.i>=TOTAL||G.lives<=0)return finish();
-  hud();G.locked=false;G.assisted=false;$('gFb').innerHTML='';$('gNext').style.display='none';
+  hud();G.locked=false;G.assisted=false;$('gFb').innerHTML='';$('gNext').style.display='none';karHide();
   const q=BUILD[G.mode]();G.cur=q;
   $('gQ').innerHTML=q.html;
   $('gOpts').className='opts'+(q.opts.some(o=>o.length>10)?' one':'');
