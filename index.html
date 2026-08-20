@@ -65,6 +65,7 @@ button{font-family:inherit}
 .big-res .em{font-size:4rem}
 .big-res h2{margin:.3rem 0}
 .pill{display:inline-block;background:var(--card2);padding:.35rem .8rem;border-radius:99px;margin:.2rem;font-size:.85rem}
+select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;border-radius:.7rem;padding:.7rem;font-size:.95rem;font-family:inherit}
 @media(max-width:380px){.opts{grid-template-columns:1fr}}
 </style>
 </head>
@@ -114,6 +115,14 @@ button{font-family:inherit}
     <h3 style="margin:.1rem 0 .8rem">🏅 Medallas</h3>
     <div class="medals" id="medalGrid"></div>
   </div>
+  <div class="card">
+    <h3 style="margin:.1rem 0 .6rem">🔊 Voz</h3>
+    <p style="margin:0 0 .6rem;font-size:.78rem;color:var(--mut)">Elige la que suene mejor. En Mac: <b>Samantha</b> o <b>Ava</b>. Puedes descargar voces de más calidad en Ajustes → Accesibilidad → Contenido hablado → Voces del sistema.</p>
+    <div class="row" style="margin:0">
+      <select id="voiceSel" onchange="setVoice(this.value)"></select>
+      <button class="spk" onclick="say('Hello! I am ready to practice English with you.')">▶︎ Probar</button>
+    </div>
+  </div>
   <button class="btn ghost" onclick="resetAll()">🗑️ Reiniciar progreso</button>
   <div style="height:1.5rem"></div>
 </div>
@@ -158,12 +167,45 @@ const $=id=>document.getElementById(id);
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
 const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const shuffle=a=>a.slice().sort(()=>Math.random()-.5);
-function say(t,rate=.85){if(!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=rate;speechSynthesis.speak(u);}
+/* ---------- voz ---------- */
+/* Prioridad: voces neuronales/premium en-US > en-GB > cualquier inglesa.
+   Se evitan las voces "novelty" de macOS (Albert, Bad News, Zarvox...) */
+const BAD=/albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|jester|junior|organ|superstar|trinoids|whisper|wobble|zarvox|ralph|fred|kathy|princess|hysterical|pipe|bruce|agnes|victoria/i;
+const PREF=['samantha','google us english','microsoft aria','microsoft jenny','microsoft guy','ava','allison','susan','karen','daniel','alex','moira','tessa','serena','google uk english female'];
+let VOICES=[],voice=null;
+function loadVoices(){
+  VOICES=(speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang)&&!BAD.test(v.name));
+  const saved=localStorage.getItem('eq.voice');
+  voice=VOICES.find(v=>v.name===saved)
+     || PREF.map(p=>VOICES.find(v=>v.name.toLowerCase().includes(p))).find(Boolean)
+     || VOICES.find(v=>/en[-_]US/i.test(v.lang))
+     || VOICES[0] || null;
+  const sel=$('voiceSel');
+  if(sel){
+    sel.innerHTML=VOICES.map(v=>`<option ${v===voice?'selected':''}>${v.name}</option>`).join('')
+      ||'<option>(sin voces en inglés)</option>';
+  }
+}
+function setVoice(name){
+  voice=VOICES.find(v=>v.name===name)||voice;
+  localStorage.setItem('eq.voice',name);
+  say('Hello! Let\'s practice English.');
+}
+if(window.speechSynthesis){loadVoices();speechSynthesis.onvoiceschanged=loadVoices;}
+
+function say(t,rate=.9){
+  if(!window.speechSynthesis)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  if(voice){u.voice=voice;u.lang=voice.lang;}else{u.lang='en-US';}
+  u.rate=rate;u.pitch=1;u.volume=1;
+  speechSynthesis.speak(u);
+}
 /* botón 🔊: reproduce lo que sea seguro escuchar en cada momento */
 function repeatAudio(){
   const q=G.cur;if(!q)return;
   const t=G.locked?(q.speakAfter||q.speak||q.audio):(q.speak||q.audio);
-  if(t)say(t,q.rate||.8);
+  if(t)say(t,q.rate||.9);
 }
 function paintSpk(){
   const q=G.cur,b=$('spkBtn');if(!q)return;
@@ -275,16 +317,16 @@ function qAbc(){
   const t=ri(1,3), [L,P]=rnd(ABC);
   if(t===1){ // escuchar → letra
     const o=new Set([L]);while(o.size<4)o.add(rnd(ABC)[0]);
-    return{html:'🎧 ¿Qué letra escuchas?',opts:shuffle([...o]),ans:L,tip:`Era ${L} (se dice "${P}")`,audio:L,rate:.6,speak:L,onOk:()=>say(L,.6)};
+    return{html:'🎧 ¿Qué letra escuchas?',opts:shuffle([...o]),ans:L,tip:`Era ${L} (se dice "${P}")`,audio:L,rate:.85,speak:L,onOk:()=>say(L,.85)};
   }
   if(t===2){ // letra → pronunciación
     const o=new Set([P]);while(o.size<4)o.add(rnd(ABC)[1]);
-    return{html:`¿Cómo se pronuncia <span class="big">${L}</span>?`,opts:shuffle([...o]),ans:P,tip:`${L} se dice "${P}"`,speakAfter:L,rate:.6,onOk:()=>say(L,.6)};
+    return{html:`¿Cómo se pronuncia <span class="big">${L}</span>?`,opts:shuffle([...o]),ans:P,tip:`${L} se dice "${P}"`,speakAfter:L,rate:.85,onOk:()=>say(L,.85)};
   }
   // siguiente letra
   const i=ri(0,24),cur=ABC[i][0],nx=ABC[i+1][0];
   const o=new Set([nx]);while(o.size<4)o.add(rnd(ABC)[0]);
-  return{html:`¿Qué letra va después de <span class="big">${cur}</span>?`,opts:shuffle([...o]),ans:nx,tip:`Después de ${cur} va ${nx}`,speak:cur,rate:.6,speakAfter:cur+', '+nx,onOk:()=>say(cur+' '+nx,.6)};
+  return{html:`¿Qué letra va después de <span class="big">${cur}</span>?`,opts:shuffle([...o]),ans:nx,tip:`Después de ${cur} va ${nx}`,speak:cur,rate:.85,speakAfter:cur+', '+nx,onOk:()=>say(cur+" "+nx,.85)};
 }
 const BUILD={ww:qWW,num:qNum,abc:qAbc,mix:()=>rnd([qWW,qNum,qAbc])()};
 const NAME={ww:'was / were',num:'Numbers',abc:'Alphabet',mix:'Modo Mixto'};
