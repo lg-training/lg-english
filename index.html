@@ -56,11 +56,44 @@ button{font-family:inherit}
 .spk{background:var(--card2);border:none;color:var(--tx);border-radius:.7rem;padding:.7rem 1rem;cursor:pointer;font-size:1.1rem}
 .row{display:flex;gap:.5rem;justify-content:center;align-items:center;margin-top:.6rem}
 /* medals */
-.medals{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.6rem}
-.medal{background:var(--card2);border-radius:.8rem;padding:.7rem .4rem;text-align:center;opacity:.32;filter:grayscale(1)}
-.medal.got{opacity:1;filter:none;box-shadow:0 0 0 2px var(--gold) inset}
-.medal .m{font-size:1.8rem}
-.medal .n{font-size:.7rem;margin-top:.2rem;line-height:1.2}
+.medals{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:.6rem}
+.trophy{background:var(--card2);border:1px solid #24365a;border-radius:.8rem;padding:.7rem .5rem;text-align:center;opacity:.45;filter:grayscale(.8)}
+.trophy.got{opacity:1;filter:none;border-color:var(--gold)}
+.tico{font-size:1.7rem;position:relative;line-height:1.1}
+.tico .tt{position:absolute;right:-2px;bottom:-4px;font-size:.85rem}
+.tn{font-size:.72rem;margin:.25rem 0 .35rem;line-height:1.2}
+.tsub{font-size:.63rem;color:var(--mut);margin-top:.3rem}
+.mbar{height:5px;background:#0e1a2e;border-radius:99px;overflow:hidden}
+.mbar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .4s}
+/* misiones */
+.mis{background:var(--card2);border:1px solid #24365a;border-radius:.7rem;padding:.6rem .7rem;margin-bottom:.5rem}
+.mis.done{border-color:var(--ok);opacity:.75}
+.mtop{display:flex;justify-content:space-between;gap:.5rem;font-size:.85rem;margin-bottom:.4rem}
+.mtop b{color:var(--gold);flex:none}
+.msub{font-size:.68rem;color:var(--mut);margin-top:.25rem;text-align:right}
+#rank{font-size:.8rem;color:var(--gold);text-align:center;margin-top:-.6rem;margin-bottom:.8rem}
+/* ---- quest log lateral ---- */
+#questBtn{position:fixed;right:1rem;bottom:1rem;z-index:25;width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));border:none;font-size:1.5rem;cursor:pointer;
+  box-shadow:0 6px 20px #0009;display:grid;place-items:center;transition:transform .15s}
+#questBtn:active{transform:scale(.92)}
+#questBtn.pulse{animation:qpulse .7s ease 2}
+@keyframes qpulse{0%,100%{box-shadow:0 6px 20px #0009}50%{box-shadow:0 0 0 12px #fbbf2440,0 6px 20px #0009;transform:scale(1.08)}}
+#questBtn span{position:absolute;top:-3px;right:-3px;background:var(--bad);color:#fff;font-size:.7rem;
+  min-width:21px;height:21px;border-radius:99px;display:grid;place-items:center;font-weight:700;border:2px solid var(--bg)}
+#questBtn span.zero{background:var(--ok);color:#052e16}
+#quests{position:fixed;inset:0;background:#050a14cc;backdrop-filter:blur(2px);z-index:26;display:none}
+#quests.on{display:block}
+.qpanel{position:absolute;top:0;right:0;bottom:0;width:min(340px,88vw);background:var(--bg);
+  border-left:1px solid #24365a;display:flex;flex-direction:column;animation:slide .25s ease}
+@keyframes slide{from{transform:translateX(100%)}}
+.qhead{display:flex;align-items:center;padding:1rem;border-bottom:1px solid #24365a}
+.qhead b{font-size:1.05rem}
+.qhead .xbtn{margin-left:auto}
+.qstreak{padding:.6rem 1rem;font-size:.82rem;color:var(--gold);border-bottom:1px solid #24365a}
+.qstreak:empty{display:none}
+.qbody{flex:1;overflow-y:auto;padding:1rem}
+.qfoot{padding:.8rem 1rem;font-size:.7rem;color:var(--mut);border-top:1px solid #24365a;text-align:center}
 /* toast */
 #toast{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%) translateY(150%);background:var(--gold);color:#3b2600;padding:.7rem 1.1rem;border-radius:.8rem;font-weight:700;transition:.35s;z-index:9;box-shadow:0 8px 24px #0008}
 #toast.on{transform:translateX(-50%) translateY(0)}
@@ -125,13 +158,14 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
 <!-- ============ HOME ============ -->
 <div id="home" class="screen on">
   <h1>English Quest 🎮</h1>
-  <div class="sub">Juega, gana XP y desbloquea medallas</div>
+  <div class="sub">Juega, gana XP y sube de rango</div>
+  <div id="rank">🥚 Novato</div>
 
   <div class="stats">
     <div class="stat"><b id="sLvl">1</b><span>NIVEL</span></div>
     <div class="stat"><b id="sXp">0</b><span>XP</span></div>
-    <div class="stat"><b id="sStreak">0</b><span>MEJOR RACHA</span></div>
-    <div class="stat"><b id="sMed">0</b><span>MEDALLAS</span></div>
+    <div class="stat"><b id="sStreak">0</b><span>DÍAS 🔥</span></div>
+    <div class="stat"><b id="sMed">0</b><span>TROFEOS</span></div>
   </div>
   <div class="card" style="padding:.7rem 1rem">
     <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--mut)">
@@ -168,7 +202,7 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
   </div>
 
   <div class="card">
-    <h3 style="margin:.1rem 0 .8rem">🏅 Medallas</h3>
+    <h3 style="margin:.1rem 0 .8rem">🏅 Trofeos</h3>
     <div class="medals" id="medalGrid"></div>
   </div>
   <div class="card">
@@ -223,6 +257,22 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
 </div>
 <div id="toast"></div>
 <div id="kar"><div class="kbox" id="kbox"></div></div>
+
+<!-- ============ QUEST LOG (panel lateral) ============ -->
+<button id="questBtn" onclick="toggleQuests()" title="Misiones de hoy">
+  🎯<span id="questBadge">0</span>
+</button>
+<div id="quests">
+  <div class="qpanel">
+    <div class="qhead">
+      <b>🎯 Misiones de hoy</b>
+      <button class="xbtn" onclick="toggleQuests(0)">✕</button>
+    </div>
+    <div class="qstreak" id="misDay"></div>
+    <div class="qbody"><div id="misList"></div></div>
+    <div class="qfoot">Se renuevan cada día a medianoche 🌙</div>
+  </div>
+</div>
 
 <!-- ============ HELP OVERLAY ============ -->
 <div id="help">
@@ -438,37 +488,141 @@ function go(s){document.querySelectorAll('.screen').forEach(x=>x.classList.remov
 
 /* ================= save data ================= */
 const KEY='englishQuest.v1';
-const DEF={xp:0,best:0,totalOk:0,rounds:0,perfect:0,medals:[],high:{ww:0,num:0,abc:0,mix:0},done:{ww:0,num:0,abc:0,mix:0}};
+const DEF={xp:0,best:0,totalOk:0,rounds:0,perfect:0,medals:[],high:{ww:0,num:0,abc:0,mix:0},done:{ww:0,num:0,abc:0,mix:0},
+           lastDay:'',dayStreak:0,bestDay:0,mis:null,tiers:{}};
 let S=Object.assign({},DEF,JSON.parse(localStorage.getItem(KEY)||'{}'));
 const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
-function resetAll(){if(confirm('¿Borrar todo el progreso?')){S=JSON.parse(JSON.stringify(DEF));save();paintHome();}}
+function resetAll(){if(confirm('¿Borrar todo el progreso?')){S=JSON.parse(JSON.stringify(DEF));save();newMissions();paintHome();}}
 
-const MEDALS=[
- {id:'first',m:'🌟',n:'Primera ronda',ck:()=>S.rounds>=1},
- {id:'s5',m:'🔥',n:'Racha de 5',ck:()=>S.best>=5},
- {id:'s10',m:'⚡',n:'Racha de 10',ck:()=>S.best>=10},
- {id:'perfect',m:'💎',n:'Ronda perfecta',ck:()=>S.perfect>=1},
- {id:'p3',m:'👑',n:'3 perfectas',ck:()=>S.perfect>=3},
- {id:'xp250',m:'🚀',n:'250 XP',ck:()=>S.xp>=250},
- {id:'xp1000',m:'🌈',n:'1000 XP',ck:()=>S.xp>=1000},
- {id:'ok100',m:'🧠',n:'100 aciertos',ck:()=>S.totalOk>=100},
- {id:'mww',m:'📝',n:'Master was/were',ck:()=>S.done.ww>=5},
- {id:'mnum',m:'🔢',n:'Master Numbers',ck:()=>S.done.num>=5},
- {id:'mabc',m:'🔤',n:'Master Alphabet',ck:()=>S.done.abc>=5},
- {id:'mmix',m:'🎲',n:'Master Mixto',ck:()=>S.done.mix>=5},
+/* ---------- niveles y rangos ----------
+   Curva creciente: cada nivel cuesta un 12% más que el anterior.
+   Así los primeros niveles caen rápido (enganchan) y los altos cuestan.
+   Rango máximo (Leyenda, nivel 40) ≈ 600 rondas: meses de juego. */
+function lvlInfo(xp){
+  let l=1,need=100;
+  while(xp>=need){xp-=need;l++;need=Math.round(need*1.12/5)*5;}
+  return {l,into:xp,need};
+}
+const lvlOf=xp=>lvlInfo(xp).l;
+const RANKS=[[1,'🥚','Novato'],[3,'🐣','Aprendiz'],[6,'🧭','Explorador'],[10,'🗺️','Aventurero'],
+             [15,'⚔️','Experto'],[22,'🎓','Maestro'],[30,'🏆','Campeón'],[40,'🐉','Leyenda']];
+const rankOf=l=>RANKS.filter(r=>l>=r[0]).pop();
+
+/* ---------- trofeos por niveles (bronce→plata→oro→diamante) ---------- */
+const TIER=['🥉','🥈','🥇','💎'],TIERN=['Bronce','Plata','Oro','Diamante'];
+const TROPHIES=[
+ {id:'streak', ic:'🔥', n:'Racha',        u:'seguidas', v:()=>S.best,      t:[5,10,20,30]},
+ {id:'ok',     ic:'🧠', n:'Aciertos',     u:'aciertos', v:()=>S.totalOk,   t:[50,150,400,1000]},
+ {id:'perfect',ic:'💠', n:'Perfectas',    u:'rondas',   v:()=>S.perfect,   t:[1,5,15,30]},
+ {id:'xp',     ic:'🚀', n:'Experiencia',  u:'XP',       v:()=>S.xp,        t:[250,1000,3000,8000]},
+ {id:'rounds', ic:'🎯', n:'Rondas',       u:'rondas',   v:()=>S.rounds,    t:[5,25,75,150]},
+ {id:'days',   ic:'📅', n:'Días seguidos',u:'días',     v:()=>S.bestDay,   t:[2,5,15,30]},
+ {id:'ww',     ic:'📝', n:'was / were',   u:'rondas',   v:()=>S.done.ww,   t:[5,15,40,80]},
+ {id:'num',    ic:'🔢', n:'Numbers',      u:'rondas',   v:()=>S.done.num,  t:[5,15,40,80]},
+ {id:'abc',    ic:'🔤', n:'Alphabet',     u:'rondas',   v:()=>S.done.abc,  t:[5,15,40,80]},
+ {id:'mix',    ic:'🎲', n:'Modo Mixto',   u:'rondas',   v:()=>S.done.mix,  t:[5,15,40,80]},
 ];
-function checkMedals(){MEDALS.forEach(md=>{if(!S.medals.includes(md.id)&&md.ck()){S.medals.push(md.id);toast('🏅 ¡Medalla! '+md.n)}});save();}
-const lvlOf=xp=>Math.floor(xp/100)+1;
+const tierOf=tr=>tr.t.filter(x=>tr.v()>=x).length;          // 0..4
+const totalTiers=()=>TROPHIES.reduce((s,tr)=>s+tierOf(tr),0);
+
+function checkMedals(){
+  TROPHIES.forEach(tr=>{
+    const now=tierOf(tr),prev=S.tiers[tr.id]||0;
+    if(now>prev){
+      S.tiers[tr.id]=now;
+      for(let k=prev;k<now;k++)toast(`${TIER[k]} ¡${tr.n} ${TIERN[k]}!`);
+    }
+  });
+  S.medals=Object.keys(S.tiers);   // compat
+  save();
+}
+
+/* ---------- racha de días ---------- */
+const today=()=>new Date().toISOString().slice(0,10);
+function touchDay(){
+  const d=today();if(S.lastDay===d)return;
+  const yd=new Date(Date.now()-864e5).toISOString().slice(0,10);
+  S.dayStreak = S.lastDay===yd ? S.dayStreak+1 : 1;
+  S.lastDay=d;
+  if(S.dayStreak>S.bestDay)S.bestDay=S.dayStreak;
+  save();
+}
+
+/* ---------- misiones diarias ---------- */
+const MISPOOL=[
+ {t:'ok',     goal:20, xp:40, txt:g=>`Consigue ${g} aciertos`},
+ {t:'ok',     goal:35, xp:70, txt:g=>`Consigue ${g} aciertos`},
+ {t:'rounds', goal:3,  xp:50, txt:g=>`Juega ${g} rondas`},
+ {t:'streak', goal:6,  xp:60, txt:g=>`Encadena una racha de ${g}`,max:1},
+ {t:'streak', goal:10, xp:90, txt:g=>`Encadena una racha de ${g}`,max:1},
+ {t:'perfect',goal:1,  xp:80, txt:()=>`Haz una ronda perfecta`},
+ {t:'m_ww',   goal:2,  xp:45, txt:g=>`Juega ${g} rondas de was/were`},
+ {t:'m_num',  goal:2,  xp:45, txt:g=>`Juega ${g} rondas de Numbers`},
+ {t:'m_abc',  goal:2,  xp:45, txt:g=>`Juega ${g} rondas de Alphabet`},
+ {t:'m_mix',  goal:1,  xp:55, txt:g=>`Juega ${g} ronda de Modo Mixto`},
+];
+function seed(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return Math.abs(h);}
+function newMissions(){
+  const d=today();
+  if(S.mis&&S.mis.d===d)return;
+  const h=seed(d),pool=MISPOOL.map((m,i)=>({m,i}));
+  const pick=[];
+  for(let k=0;pick.length<3&&k<40;k++){
+    const c=pool[(h+k*7)%pool.length];
+    if(!pick.some(p=>p.m.t===c.m.t))pick.push(c);
+  }
+  S.mis={d,list:pick.map(({m})=>({t:m.t,goal:m.goal,xp:m.xp,txt:m.txt(m.goal),max:!!m.max,prog:0,done:false}))};
+  save();
+}
+function bump(type,val){
+  if(!S.mis)return;let changed=false;
+  S.mis.list.forEach(m=>{
+    if(m.done||m.t!==type)return;
+    m.prog = m.max ? Math.max(m.prog,val) : m.prog+val;
+    if(m.prog>=m.goal){m.done=true;S.xp+=m.xp;toast(`🎯 ¡Misión cumplida! +${m.xp} XP`);changed=true;}
+  });
+  save();
+  if(changed){
+    const b=$('questBtn');b.classList.remove('pulse');void b.offsetWidth;b.classList.add('pulse');
+  }
+  paintHome();
+}
 
 function paintHome(){
-  $('sLvl').textContent=lvlOf(S.xp);$('sXp').textContent=S.xp;
-  $('sStreak').textContent=S.best;$('sMed').textContent=S.medals.length;
-  $('lvlA').textContent=lvlOf(S.xp);
-  const into=S.xp%100;$('lvlTxt').textContent=into+' / 100 XP';$('lvlBar').style.width=into+'%';
+  const L=lvlInfo(S.xp),lv=L.l,rk=rankOf(lv);
+  $('sLvl').textContent=lv;$('sXp').textContent=S.xp;
+  $('sStreak').textContent=S.dayStreak;$('sMed').textContent=totalTiers();
+  $('lvlA').textContent=lv;
+  $('rank').textContent=rk[1]+' '+rk[2];
+  $('lvlTxt').textContent=L.into+' / '+L.need+' XP';
+  $('lvlBar').style.width=(L.into/L.need*100)+'%';
   ['ww','num','abc','mix'].forEach(k=>$('b'+k).textContent=S.high[k]?S.high[k]+'/10':'–');
-  $('medalGrid').innerHTML=MEDALS.map(m=>
-    `<div class="medal ${S.medals.includes(m.id)?'got':''}"><div class="m">${m.m}</div><div class="n">${m.n}</div></div>`).join('');
+
+  /* misiones */
+  $('misDay').textContent=S.dayStreak>1?`🔥 ${S.dayStreak} días seguidos jugando`:'';
+  $('misList').innerHTML=(S.mis?S.mis.list:[]).map(m=>{
+    const p=Math.min(100,m.prog/m.goal*100);
+    return `<div class="mis ${m.done?'done':''}">
+      <div class="mtop"><span>${m.done?'✅':'⬜'} ${m.txt}</span><b>+${m.xp} XP</b></div>
+      <div class="mbar"><i style="width:${p}%"></i></div>
+      <div class="msub">${Math.min(m.prog,m.goal)} / ${m.goal}</div></div>`;
+  }).join('');
+  const left=(S.mis?S.mis.list:[]).filter(m=>!m.done).length;
+  const bd=$('questBadge');
+  bd.textContent=left||'✓';bd.classList.toggle('zero',!left);
+
+  /* trofeos */
+  $('medalGrid').innerHTML=TROPHIES.map(tr=>{
+    const k=tierOf(tr),val=tr.v(),next=tr.t[k];
+    const p=next?Math.min(100,val/next*100):100;
+    return `<div class="trophy ${k?'got':''}">
+      <div class="tico">${tr.ic}<span class="tt">${k?TIER[k-1]:''}</span></div>
+      <div class="tn">${tr.n}</div>
+      <div class="mbar"><i style="width:${p}%"></i></div>
+      <div class="tsub">${next?`${val} / ${next} ${tr.u}`:`✨ ${val} ${tr.u}`}</div></div>`;
+  }).join('');
 }
+
 
 /* ================= content ================= */
 const ones=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
@@ -666,7 +820,9 @@ function answer(el,v){
       S.totalOk++;if(G.streak>S.best)S.best=G.streak;
       $('gFb').innerHTML=`<span style="color:var(--ok)">✅ ¡Correcto! +${gain} XP</span>`+
         (G.streak>=3?`<small>🔥 Racha de ${G.streak} — ¡bonus!</small>`:'');
+      bump('streak',G.streak);
     }
+    bump('ok',1);
     playQ();
   }else{
     el.classList.add('bad');
@@ -684,24 +840,40 @@ function finish(){
   S.xp+=G.xp;S.rounds++;S.done[G.mode]=(S.done[G.mode]||0)+1;
   if(perfect)S.perfect++;
   if(G.ok>(S.high[G.mode]||0))S.high[G.mode]=G.ok;
-  const before=S.medals.length;save();checkMedals();paintHome();
+  const before=totalTiers(),lvBefore=lvlOf(S.xp-G.xp);
+  save();
+  bump('rounds',1);bump('m_'+G.mode,1);if(perfect)bump('perfect',1);
+  checkMedals();
+  const lvNow=lvlOf(S.xp);
+  if(lvNow>lvBefore){const r=rankOf(lvNow);toast(`⬆️ ¡Nivel ${lvNow}! ${r[1]} ${r[2]}`);}
+  paintHome();
   $('rEmoji').textContent=perfect?'💎':dead?'💪':G.ok>=7?'🎉':'🙂';
   $('rTitle').textContent=perfect?'¡PERFECTO!':dead?'¡Casi! Sigue intentando':G.ok>=7?'¡Muy bien!':'¡Buen intento!';
+  const gained=totalTiers()-before;
   $('rPills').innerHTML=[
     `<span class="pill">${NAME[G.mode]}</span>`,
     `<span class="pill">✅ ${G.ok}/${TOTAL}</span>`,
     `<span class="pill">⭐ +${G.xp} XP</span>`,
     `<span class="pill">🔥 Mejor racha: ${S.best}</span>`,
-    S.medals.length>before?`<span class="pill">🏅 +${S.medals.length-before} medalla(s)</span>`:''
+    gained>0?`<span class="pill">🏅 +${gained} trofeo(s)</span>`:''
   ].join('');
   go('result');
 }
 
 /* init */
+function toggleQuests(force){
+  const q=$('quests');
+  const on=force===undefined?!q.classList.contains('on'):!!force;
+  q.classList.toggle('on',on);
+}
+$('quests').addEventListener('click',e=>{if(e.target.id==='quests')toggleQuests(0)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')toggleQuests(0)});
+
 $('spdHome').innerHTML=spdHTML();
 $('spdGame').innerHTML=spdHTML('mini');
 $('spdHelp').innerHTML=spdHTML('mini');
 paintSpeed();
+touchDay();newMissions();
 checkMedals();paintHome();
 
 /* ================= auto-actualización =================
