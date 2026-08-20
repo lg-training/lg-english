@@ -69,6 +69,9 @@ button{font-family:inherit}
 .big-res h2{margin:.3rem 0}
 .pill{display:inline-block;background:var(--card2);padding:.35rem .8rem;border-radius:99px;margin:.2rem;font-size:.85rem}
 select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;border-radius:.7rem;padding:.7rem;font-size:.95rem;font-family:inherit}
+.spd{display:flex;gap:.4rem;margin-top:.4rem}
+.spd button{flex:1;background:var(--card2);border:1px solid #24365a;color:var(--mut);padding:.55rem .3rem;border-radius:.6rem;font-size:.85rem;cursor:pointer;font-family:inherit}
+.spd button.on{border-color:var(--acc);color:var(--acc);background:#24365a}
 /* ---- help overlay ---- */
 #help{position:fixed;inset:0;background:#050a14e0;backdrop-filter:blur(3px);z-index:20;display:none}
 #help.on{display:block}
@@ -164,6 +167,12 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
       <select id="voiceSel" onchange="setVoice(this.value)"></select>
       <button class="spk" onclick="say('Hello! I am ready to practice English with you.')">▶︎ Probar</button>
     </div>
+    <div style="margin-top:.9rem;font-size:.8rem;color:var(--mut)">Velocidad</div>
+    <div class="spd">
+      <button data-v="0.7" onclick="setSpeed(0.7,this)">🐢 Lenta</button>
+      <button data-v="0.85" onclick="setSpeed(0.85,this)">🚶 Media</button>
+      <button data-v="1" onclick="setSpeed(1,this)">🐇 Normal</button>
+    </div>
   </div>
   <button class="btn ghost" onclick="resetAll()">🗑️ Reiniciar progreso</button>
   <div style="height:1.5rem"></div>
@@ -179,7 +188,7 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
   <div class="prog"><i id="hProg" style="width:0"></i></div>
   <div class="card">
     <div class="q" id="gQ">—</div>
-    <div class="row" id="gSpk"><button class="spk" id="spkBtn" onclick="repeatAudio()">🔊 Escuchar</button></div>
+    <div class="row" id="gSpk"><button class="spk" id="spkBtn" onclick="repeatAudio()">🔊 Escuchar</button><button class="spk" id="spkSlow" onclick="repeatAudio(1)">🐢 Despacio</button></div>
     <div class="opts" id="gOpts"></div>
     <div class="fb" id="gFb"></div>
     <button class="btn" id="gNext" style="display:none" onclick="nextQ()">Siguiente ▶</button>
@@ -220,7 +229,7 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
     </div>
     <div class="hbody">
       <div id="hNum" class="hpane on">
-        <div class="note">💡 Toca cualquier número para escucharlo.</div>
+        <div class="note">💡 Toca cualquier número para escucharlo. <b>Mantén pulsado</b> para oírlo despacio 🐢</div>
         <input type="search" id="numFind" placeholder="Buscar… escribe 47 o 'forty'" oninput="filterNums(this.value)">
         <div class="rules">
           <b>Las reglas</b>
@@ -239,7 +248,7 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
           <div><span>was</span> I · he · she · it &nbsp;→&nbsp; <i>una sola cosa o persona</i></div>
           <div><span>were</span> you · we · they &nbsp;→&nbsp; <i>varias, y siempre con "you"</i></div>
         </div>
-        <div class="note">💡 Toca una frase para escucharla.</div>
+        <div class="note">💡 Toca una frase para escucharla. <b>Mantén pulsado</b> para oírla despacio 🐢</div>
         <div id="wwEx"></div>
         <div class="rules">
           <b>Negativo y pregunta</b>
@@ -250,7 +259,7 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
       </div>
 
       <div id="hAbc" class="hpane">
-        <div class="note">💡 Toca una letra para escuchar su pronunciación.</div>
+        <div class="note">💡 Toca una letra para escucharla. <b>Mantén pulsado</b> para oírla despacio 🐢</div>
         <button class="spk" onclick="sayAlphabet()" style="width:100%;margin-bottom:.8rem">🎵 Escuchar todo el abecedario</button>
         <div class="abcg" id="abcGrid"></div>
         <div class="rules">
@@ -277,6 +286,18 @@ const shuffle=a=>a.slice().sort(()=>Math.random()-.5);
 const BAD=/albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|jester|junior|organ|superstar|trinoids|whisper|wobble|zarvox|ralph|fred|kathy|princess|hysterical|pipe|bruce|agnes|victoria/i;
 const PREF=['samantha','google us english','microsoft aria','microsoft jenny','microsoft guy','ava','allison','susan','karen','daniel','alex','moira','tessa','serena','google uk english female'];
 let VOICES=[],voice=null;
+let SPEED=parseFloat(localStorage.getItem('eq.speed')||'1');
+function setSpeed(v,el){
+  SPEED=v;localStorage.setItem('eq.speed',v);
+  document.querySelectorAll('.spd button').forEach(b=>b.classList.remove('on'));
+  if(el)el.classList.add('on');
+  say('Hello! This is my speed.');
+}
+function paintSpeed(){
+  const b=document.querySelectorAll('.spd button');
+  if(!b.length)return;
+  b.forEach(x=>x.classList.toggle('on',parseFloat(x.dataset.v)===SPEED));
+}
 function loadVoices(){
   VOICES=(speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang)&&!BAD.test(v.name));
   const saved=localStorage.getItem('eq.voice');
@@ -302,21 +323,36 @@ function say(t,rate=.9){
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(t);
   if(voice){u.voice=voice;u.lang=voice.lang;}else{u.lang='en-US';}
-  u.rate=rate;u.pitch=1;u.volume=1;
+  u.rate=Math.max(.5,Math.min(1.3,rate*SPEED));
+  u.pitch=1;u.volume=1;
   speechSynthesis.speak(u);
 }
+/* 🐢 modo lento puntual: separa las palabras con comas para que la voz
+   haga pausas reales en vez de sonar arrastrada y distorsionada */
+function saySlow(t,rate=.9){
+  if(!window.speechSynthesis)return;
+  const spaced=String(t).trim().split(/\s+/).join(', ');
+  const keep=SPEED;SPEED=.7;
+  say(spaced,rate);
+  SPEED=keep;
+}
 /* botón 🔊: reproduce lo que sea seguro escuchar en cada momento */
-function repeatAudio(){
+function repeatAudio(slow){
   const q=G.cur;if(!q)return;
   const t=G.locked?(q.speakAfter||q.speak||q.audio):(q.speak||q.audio);
-  if(t)say(t,q.rate||.9);
+  if(!t)return;
+  slow?saySlow(t,q.rate||.9):say(t,q.rate||.9);
 }
 function paintSpk(){
-  const q=G.cur,b=$('spkBtn');if(!q)return;
+  const q=G.cur;if(!q)return;
   const avail=G.locked?(q.speakAfter||q.speak||q.audio):(q.speak||q.audio);
-  b.disabled=!avail;
-  b.style.opacity=avail?1:.4;
-  b.textContent=avail?'🔊 Escuchar':'🔒 Audio tras responder';
+  [['spkBtn','🔊 Escuchar'],['spkSlow','🐢 Despacio']].forEach(([id,label])=>{
+    const b=$(id);
+    b.disabled=!avail;
+    b.style.opacity=avail?1:.4;
+    b.textContent=avail?label:'🔒 Tras responder';
+  });
+  $('spkSlow').style.display=avail?'':'none';
 }
 let toastQ=[],toastBusy=false;
 function toast(msg){toastQ.push(msg);if(!toastBusy)runToast();}
@@ -446,6 +482,7 @@ function buildHelp(){
     const full=s.replace('___',a);
     return `<button class="wwline" onclick="say('${full.replace(/'/g,"\\'")}')">🔊 ${s.replace('___','<b>'+a+'</b>')}</button>`;
   }).join('');
+  paintSpeed();
 }
 function filterNums(q){
   q=(q||'').trim().toLowerCase();
@@ -486,6 +523,25 @@ function sayAlphabet(){
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHelp()});
 $('help').addEventListener('click',e=>{if(e.target.id==='help')closeHelp()});
+
+/* Pulsación larga (0.5s) en el repaso = pronunciación lenta */
+(function longPress(){
+  let t=null,fired=false;
+  const target=e=>e.target.closest('#numGrid button,#abcGrid button,.wwline');
+  const txt=el=>el.dataset.w||el.querySelector('b')?.textContent||el.textContent.replace('🔊','').trim();
+  const down=e=>{
+    const el=target(e);if(!el)return;fired=false;
+    t=setTimeout(()=>{fired=true;saySlow(txt(el));if(navigator.vibrate)navigator.vibrate(30);},500);
+  };
+  const up=()=>clearTimeout(t);
+  const help=$('help');
+  help.addEventListener('pointerdown',down);
+  help.addEventListener('pointerup',up);
+  help.addEventListener('pointerleave',up);
+  help.addEventListener('pointercancel',up);
+  help.addEventListener('click',e=>{if(fired){e.stopPropagation();e.preventDefault();fired=false;}},true);
+  help.addEventListener('contextmenu',e=>{if(target(e))e.preventDefault()});
+})();
 buildHelp();
 
 /* ================= game engine ================= */
