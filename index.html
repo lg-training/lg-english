@@ -74,6 +74,10 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
 .spd button.on{border-color:var(--acc);color:var(--acc);background:#24365a}
 .spd.mini button{padding:.35rem .2rem;font-size:1rem;line-height:1.1}
 .spd.mini{margin-top:.5rem}
+#spdGame{margin-top:1rem}
+#spdGame button{padding:.7rem .3rem;font-size:1.4rem;line-height:1.2}
+#spdGame button.on{box-shadow:0 0 0 1px var(--acc) inset}
+.spdhint{text-align:center;font-size:.75rem;color:var(--mut);margin-top:.45rem}
 /* ---- karaoke ---- */
 #kar{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%) translateY(160%);z-index:30;transition:transform .28s cubic-bezier(.3,1.4,.5,1);pointer-events:none;width:max-content;max-width:92vw}
 #kar.on{transform:translateX(-50%) translateY(0)}
@@ -193,8 +197,8 @@ select{flex:1;background:var(--card2);color:var(--tx);border:1px solid #24365a;b
   <div class="prog"><i id="hProg" style="width:0"></i></div>
   <div class="card">
     <div class="q" id="gQ">—</div>
-    <div class="row" id="gSpk"><button class="spk" id="spkBtn" onclick="repeatAudio()">🔊 Escuchar</button><button class="spk" id="spkSlow" onclick="repeatAudio(1)">🐢 Despacio</button></div>
-  <div class="spd mini" id="spdGame"></div>
+    <div class="spd" id="spdGame"></div>
+  <div class="spdhint" id="spdHint">Toca para escuchar a esa velocidad</div>
     <div class="opts" id="gOpts"></div>
     <div class="fb" id="gFb"></div>
     <button class="btn" id="gNext" style="display:none" onclick="nextQ()">Siguiente ▶</button>
@@ -361,7 +365,10 @@ function sayKaraoke(text,rate=.9,slow=false){
   if(!window.speechSynthesis)return;
   speechSynthesis.cancel();karClear();
 
-  const spoken = slow ? String(text).trim().split(/\s+/).join(', ') : String(text);
+  /* a velocidad lenta separamos las palabras con comas: la voz hace pausas
+     reales en vez de sonar arrastrada */
+  const isSlow = slow || SPEED<=.7;
+  const spoken = isSlow ? String(text).trim().split(/\s+/).join(', ') : String(text);
   const words=[];                                   // {w, start, end} sobre `spoken`
   const re=/[^\s,]+/g;let m;
   while((m=re.exec(spoken))!==null)words.push({w:m[0].replace(/[.,!?]$/,''),start:m.index,end:m.index+m[0].length});
@@ -373,8 +380,7 @@ function sayKaraoke(text,rate=.9,slow=false){
 
   const u=new SpeechSynthesisUtterance(spoken);
   if(voice){u.voice=voice;u.lang=voice.lang;}else u.lang='en-US';
-  const eff=Math.max(.5,Math.min(1.3,rate*(slow?.7:SPEED)));
-  u.rate=eff;u.pitch=1;u.volume=1;
+  const eff=Math.max(.5,Math.min(1.3,rate*(slow?.7:SPEED)));  u.rate=eff;u.pitch=1;u.volume=1;
 
   let gotBoundary=false;
   u.onboundary=e=>{
@@ -411,14 +417,11 @@ function repeatAudio(slow){
 }
 function paintSpk(){
   const q=G.cur;if(!q)return;
-  const avail=G.locked?(q.speakAfter||q.speak||q.audio):(q.speak||q.audio);
-  [['spkBtn','🔊 Escuchar'],['spkSlow','🐢 Despacio']].forEach(([id,label])=>{
-    const b=$(id);
-    b.disabled=!avail;
-    b.style.opacity=avail?1:.4;
-    b.textContent=avail?label:'🔒 Tras responder';
+  const avail=!!(G.locked?(q.speakAfter||q.speak||q.audio):(q.speak||q.audio));
+  document.querySelectorAll('#spdGame button').forEach(b=>{
+    b.disabled=!avail;b.style.opacity=avail?1:.35;b.style.cursor=avail?'pointer':'default';
   });
-  $('spkSlow').style.display=avail?'':'none';
+  $('spdHint').textContent=avail?'🔊 Toca para escuchar a esa velocidad':'🔒 Audio disponible tras responder';
 }
 let toastQ=[],toastBusy=false;
 function toast(msg){toastQ.push(msg);if(!toastBusy)runToast();}
@@ -688,7 +691,7 @@ function finish(){
 
 /* init */
 $('spdHome').innerHTML=spdHTML();
-$('spdGame').innerHTML=spdHTML('mini');
+$('spdGame').innerHTML=spdHTML();
 $('spdHelp').innerHTML=spdHTML('mini');
 paintSpeed();
 checkMedals();paintHome();
