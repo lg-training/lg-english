@@ -309,9 +309,7 @@ function paintSpeed(){
 function setSpeed(v){
   SPEED=v;localStorage.setItem('eq.speed',v);paintSpeed();
   /* feedback inmediato: si estamos jugando repetimos lo actual, si no una frase de muestra */
-  const q=G&&G.cur;
-  const t=q?(G.locked?(q.speakAfter||q.speak||q.audio):(q.speak||q.audio)):null;
-  if(t&&$('game').classList.contains('on'))sayKaraoke(t,q.rate||.9);
+  if(G&&G.cur&&$('game').classList.contains('on'))playQ();
   else say('Hello! This is my speed.');
 }
 function loadVoices(){
@@ -407,11 +405,21 @@ function sayKaraoke(text,rate=.9,slow=false){
   speechSynthesis.speak(u);
 }
 /* botón 🔊: reproduce lo que sea seguro escuchar en cada momento */
-function repeatAudio(slow){
+/* Reproduce el audio de la pregunta actual.
+   En las preguntas de escucha (q.audio) el karaoke se oculta MIENTRAS no se ha
+   respondido: mostrar las palabras escritas sería una chuleta y anularía el
+   ejercicio de oído. Una vez respondida, sí se muestra para poder estudiarla. */
+function playQ(rate){
   const q=G.cur;if(!q)return;
   const t=G.locked?(q.speakAfter||q.speak||q.audio):(q.speak||q.audio);
   if(!t)return;
-  sayKaraoke(t,q.rate||.9,!!slow);
+  const blind=q.audio&&!G.locked;
+  blind?say(t,rate||q.rate||.9):sayKaraoke(t,rate||q.rate||.9);
+}
+function repeatAudio(slow){
+  const q=G.cur;if(!q)return;
+  if(slow&&q.audio&&!G.locked){const t=q.speak||q.audio;return saySlow(t,q.rate||.9);}
+  playQ();
 }
 function paintSpk(){
   const q=G.cur;if(!q)return;
@@ -419,7 +427,9 @@ function paintSpk(){
   document.querySelectorAll('#spdGame button').forEach(b=>{
     b.disabled=!avail;b.style.opacity=avail?1:.35;b.style.cursor=avail?'pointer':'default';
   });
-  $('spdHint').textContent=avail?'🔊 Toca para escuchar a esa velocidad':'🔒 Audio disponible tras responder';
+  $('spdHint').textContent = !avail ? '🔒 Audio disponible tras responder'
+    : (q.audio&&!G.locked) ? '🎧 Solo oído — sin texto hasta que respondas'
+    : '🔊 Toca para escuchar a esa velocidad';
 }
 let toastQ=[],toastBusy=false;
 function toast(msg){toastQ.push(msg);if(!toastBusy)runToast();}
@@ -657,12 +667,12 @@ function answer(el,v){
       $('gFb').innerHTML=`<span style="color:var(--ok)">✅ ¡Correcto! +${gain} XP</span>`+
         (G.streak>=3?`<small>🔥 Racha de ${G.streak} — ¡bonus!</small>`:'');
     }
-    if(q.onOk)q.onOk();
+    playQ();
   }else{
     el.classList.add('bad');
     G.streak=0;G.lives--;
     $('gFb').innerHTML=`<span style="color:var(--bad)">❌ Era "${q.ans}"</span><small>${q.tip||''}</small>`;
-    if(q.onOk)q.onOk();
+    playQ();
   }
   G.i++;hud();paintSpk();
   const nb=$('gNext');
