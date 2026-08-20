@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Practice</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --acc:#38bdf8; --ok:#22c55e; --bad:#ef4444; --tx:#e2e8f0; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--tx); }
+  header { padding:1.2rem; text-align:center; }
+  h1 { margin:0 0 .8rem; font-size:1.5rem; color:var(--acc); }
+  nav { display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap; }
+  nav button { background:var(--card); color:var(--tx); border:2px solid transparent; padding:.6rem 1rem; border-radius:.6rem; cursor:pointer; font-size:1rem; }
+  nav button.active { border-color:var(--acc); color:var(--acc); }
+  main { max-width:720px; margin:0 auto; padding:1rem; }
+  section { display:none; }
+  section.active { display:block; }
+  .card { background:var(--card); padding:1.2rem; border-radius:.8rem; margin-bottom:1rem; }
+  .q { font-size:1.3rem; margin-bottom:1rem; text-align:center; }
+  .opts { display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; }
+  .opts button, .btn { background:#334155; color:var(--tx); border:none; padding:.7rem 1.2rem; border-radius:.6rem; font-size:1.1rem; cursor:pointer; }
+  .opts button:hover, .btn:hover { background:#475569; }
+  .ok { background:var(--ok)!important; }
+  .bad { background:var(--bad)!important; }
+  .msg { text-align:center; margin-top:1rem; min-height:1.6rem; font-weight:600; }
+  .score { text-align:center; opacity:.8; font-size:.9rem; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(78px,1fr)); gap:.4rem; }
+  .grid button { background:#334155; border:none; color:var(--tx); border-radius:.5rem; padding:.5rem .2rem; cursor:pointer; font-size:.8rem; line-height:1.3; }
+  .grid button b { display:block; font-size:1.1rem; color:var(--acc); }
+  .abc { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:.5rem; }
+  .abc button { background:#334155; border:none; color:var(--tx); border-radius:.5rem; padding:.7rem .2rem; cursor:pointer; }
+  .abc button b { display:block; font-size:1.6rem; color:var(--acc); }
+  .abc button span { font-size:.85rem; opacity:.85; }
+  input[type=text] { padding:.7rem; border-radius:.6rem; border:none; font-size:1.1rem; width:140px; text-align:center; }
+  .row { display:flex; gap:.6rem; justify-content:center; align-items:center; flex-wrap:wrap; }
+  footer { text-align:center; padding:1rem; opacity:.5; font-size:.8rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎯 English Practice</h1>
+  <nav>
+    <button data-t="wasWere" class="active">was / were</button>
+    <button data-t="numbers">Numbers 1–100</button>
+    <button data-t="abc">Alphabet</button>
+  </nav>
+</header>
+
+<main>
+  <!-- WAS / WERE -->
+  <section id="wasWere" class="active">
+    <div class="card">
+      <div class="q" id="wwQ">—</div>
+      <div class="opts">
+        <button onclick="wwAnswer('was',this)">was</button>
+        <button onclick="wwAnswer('were',this)">were</button>
+      </div>
+      <div class="msg" id="wwMsg"></div>
+      <div class="score" id="wwScore"></div>
+    </div>
+    <div class="card">
+      <b>Regla rápida:</b><br>
+      <b>was</b> → I, he, she, it<br>
+      <b>were</b> → you, we, they
+    </div>
+  </section>
+
+  <!-- NUMBERS -->
+  <section id="numbers">
+    <div class="card">
+      <div class="q" id="nQ">—</div>
+      <div class="row">
+        <input type="text" id="nIn" placeholder="escribe..." autocomplete="off">
+        <button class="btn" onclick="nCheck()">Check</button>
+        <button class="btn" onclick="nSay()">🔊</button>
+        <button class="btn" onclick="nNew()">Next</button>
+      </div>
+      <div class="msg" id="nMsg"></div>
+      <div class="score" id="nScore"></div>
+    </div>
+    <div class="card">
+      <b>Tabla 1–100</b> (clic para escuchar)
+      <div class="grid" id="nGrid"></div>
+    </div>
+  </section>
+
+  <!-- ALPHABET -->
+  <section id="abc">
+    <div class="card">
+      <b>Abecedario</b> — clic en la letra para escuchar la pronunciación
+      <div class="abc" id="abcGrid" style="margin-top:.8rem"></div>
+    </div>
+    <div class="card">
+      <div class="q" id="aQ">Escucha y elige la letra</div>
+      <div class="row"><button class="btn" onclick="aSay()">🔊 Repetir</button></div>
+      <div class="opts" id="aOpts" style="margin-top:1rem"></div>
+      <div class="msg" id="aMsg"></div>
+      <div class="score" id="aScore"></div>
+    </div>
+  </section>
+</main>
+
+<footer>Hecho con ❤️ para practicar inglés</footer>
+
+<script>
+/* ---------- utils ---------- */
+const $ = id => document.getElementById(id);
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+function say(text, rate=.85){
+  if(!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang='en-US'; u.rate=rate;
+  speechSynthesis.speak(u);
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('nav button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('section').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); $(b.dataset.t).classList.add('active');
+  };
+});
+
+/* ---------- WAS / WERE ---------- */
+const wwData = [
+  ["I ___ at school yesterday.","was"],
+  ["She ___ very happy.","was"],
+  ["They ___ playing football.","were"],
+  ["We ___ at the park.","were"],
+  ["He ___ my best friend.","was"],
+  ["You ___ late today.","were"],
+  ["It ___ a sunny day.","was"],
+  ["My parents ___ tired.","were"],
+  ["The cat ___ on the sofa.","was"],
+  ["The children ___ in the garden.","were"],
+  ["I ___ not hungry.","was"],
+  ["You and Tom ___ at the cinema.","were"],
+  ["The book ___ interesting.","was"],
+  ["There ___ many people.","were"],
+  ["There ___ a big dog.","was"],
+  ["Anna and I ___ classmates.","were"],
+  ["My teacher ___ very kind.","was"],
+  ["The shoes ___ too small.","were"],
+  ["It ___ cold last night.","was"],
+  ["We ___ born in 2015.","were"]
+];
+let ww={i:null,ok:0,n:0};
+function wwNew(){
+  ww.i = rnd(wwData);
+  $('wwQ').textContent = ww.i[0];
+  $('wwMsg').textContent='';
+  document.querySelectorAll('#wasWere .opts button').forEach(b=>b.className='');
+}
+function wwAnswer(v,el){
+  ww.n++;
+  if(v===ww.i[1]){ ww.ok++; el.classList.add('ok'); $('wwMsg').textContent='✅ ¡Correcto!';
+    say(ww.i[0].replace('___',ww.i[1]));
+    setTimeout(wwNew,1400);
+  } else { el.classList.add('bad'); $('wwMsg').textContent='❌ Es "'+ww.i[1]+'"';
+    setTimeout(wwNew,1800);
+  }
+  $('wwScore').textContent = `Aciertos: ${ww.ok} / ${ww.n}`;
+}
+
+/* ---------- NUMBERS ---------- */
+const ones=["zero","one","two","three","four","five","six","seven","eight","nine","ten",
+"eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+const tens=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+function toWords(n){
+  if(n===100) return "one hundred";
+  if(n<20) return ones[n];
+  const t=Math.floor(n/10), u=n%10;
+  return u? tens[t]+"-"+ones[u] : tens[t];
+}
+let num={v:1,ok:0,n:0};
+function nNew(){
+  num.v = 1+Math.floor(Math.random()*100);
+  $('nQ').textContent = num.v;
+  $('nIn').value=''; $('nMsg').textContent=''; $('nIn').focus();
+}
+function nSay(){ say(toWords(num.v)); }
+function nCheck(){
+  const g = $('nIn').value.trim().toLowerCase().replace(/\s+/g,'-');
+  if(!g) return;
+  num.n++;
+  if(g===toWords(num.v)){ num.ok++; $('nMsg').textContent='✅ ¡Muy bien!'; say(toWords(num.v)); setTimeout(nNew,1300); }
+  else { $('nMsg').textContent='❌ Es "'+toWords(num.v)+'"'; say(toWords(num.v)); setTimeout(nNew,2200); }
+  $('nScore').textContent = `Aciertos: ${num.ok} / ${num.n}`;
+}
+$('nIn').addEventListener('keydown',e=>{ if(e.key==='Enter') nCheck(); });
+(function buildGrid(){
+  let h='';
+  for(let i=1;i<=100;i++) h+=`<button onclick="say('${toWords(i)}')"><b>${i}</b>${toWords(i)}</button>`;
+  $('nGrid').innerHTML=h;
+})();
+
+/* ---------- ALPHABET ---------- */
+const alpha=[["A","ei"],["B","bi"],["C","si"],["D","di"],["E","i"],["F","ef"],["G","yi"],
+["H","eich"],["I","ai"],["J","yei"],["K","kei"],["L","el"],["M","em"],["N","en"],["O","ou"],
+["P","pi"],["Q","kiu"],["R","ar"],["S","es"],["T","ti"],["U","iu"],["V","vi"],
+["W","dábliu"],["X","eks"],["Y","uai"],["Z","zi"]];
+$('abcGrid').innerHTML = alpha.map(([l,p])=>
+  `<button onclick="say('${l}',.7)"><b>${l}</b><span>${p}</span></button>`).join('');
+
+let a={l:null,ok:0,n:0};
+function aNew(){
+  a.l = rnd(alpha);
+  const opts=[a.l];
+  while(opts.length<4){ const c=rnd(alpha); if(!opts.includes(c)) opts.push(c); }
+  opts.sort(()=>Math.random()-.5);
+  $('aOpts').innerHTML = opts.map(o=>`<button onclick="aAnswer('${o[0]}',this)">${o[0]}</button>`).join('');
+  $('aMsg').textContent='';
+  aSay();
+}
+function aSay(){ if(a.l) say(a.l,.7); }
+function aAnswer(v,el){
+  a.n++;
+  if(v===a.l[0]){ a.ok++; el.classList.add('ok'); $('aMsg').textContent='✅ ¡Correcto!'; setTimeout(aNew,1200); }
+  else { el.classList.add('bad'); $('aMsg').textContent='❌ Era "'+a.l[0]+'" ('+a.l[1]+')'; setTimeout(aNew,1800); }
+  $('aScore').textContent = `Aciertos: ${a.ok} / ${a.n}`;
+}
+
+/* init */
+wwNew(); nNew(); aNew();
+</script>
+</body>
+</html>
