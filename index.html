@@ -55,14 +55,48 @@ button{font-family:inherit}
 .fb small{display:block;font-weight:400;color:var(--mut);font-size:.8rem;margin-top:.25rem}
 .spk{background:var(--card2);border:none;color:var(--tx);border-radius:.7rem;padding:.7rem 1rem;cursor:pointer;font-size:1.1rem}
 .row{display:flex;gap:.5rem;justify-content:center;align-items:center;margin-top:.6rem}
-/* medals */
-.medals{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:.6rem}
-.trophy{background:var(--card2);border:1px solid #24365a;border-radius:.8rem;padding:.7rem .5rem;text-align:center;opacity:.45;filter:grayscale(.8)}
-.trophy.got{opacity:1;filter:none;border-color:var(--gold)}
-.tico{font-size:1.7rem;position:relative;line-height:1.1}
-.tico .tt{position:absolute;right:-2px;bottom:-4px;font-size:.85rem}
-.tn{font-size:.72rem;margin:.25rem 0 .35rem;line-height:1.2}
-.tsub{font-size:.63rem;color:var(--mut);margin-top:.3rem}
+/* ---- medallas ---- */
+.medals{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:.9rem .4rem}
+.trophy{text-align:center;position:relative;padding-top:.5rem}
+.trophy.locked{opacity:.4}
+
+/* cinta */
+.ribbon{position:relative;width:62px;height:26px;margin:0 auto -13px;z-index:1}
+.ribbon i{position:absolute;top:0;width:18px;height:30px;background:#3f5b8a;
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%)}
+.ribbon i:first-child{left:6px;transform:rotate(12deg)}
+.ribbon i:last-child{right:6px;transform:rotate(-12deg);background:#31456b}
+
+/* disco */
+.disc{position:relative;width:60px;height:60px;margin:0 auto;border-radius:50%;
+  display:grid;place-items:center;font-size:1.7rem;z-index:2;
+  background:radial-gradient(circle at 32% 28%,#5b6b86,#2c3850 70%);
+  box-shadow:inset 0 0 0 3px #ffffff1f, inset 0 -6px 12px #0006, 0 4px 10px #0007}
+.disc::after{content:'';position:absolute;inset:5px;border-radius:50%;
+  border:2px dashed #ffffff1a;pointer-events:none}
+.t1 .disc{background:radial-gradient(circle at 32% 28%,#e8a56a,#a55a24 68%);box-shadow:inset 0 0 0 3px #ffd9b355,inset 0 -6px 12px #00000055,0 4px 12px #a55a2455}
+.t2 .disc{background:radial-gradient(circle at 32% 28%,#f2f5f9,#8e9bb0 68%);box-shadow:inset 0 0 0 3px #ffffff88,inset 0 -6px 12px #00000044,0 4px 12px #8e9bb055}
+.t3 .disc{background:radial-gradient(circle at 32% 28%,#ffe89a,#d09a12 68%);box-shadow:inset 0 0 0 3px #fff3c455,inset 0 -6px 12px #00000044,0 4px 14px #d09a1266}
+.t4 .disc{background:radial-gradient(circle at 32% 28%,#d8fbff,#4fd0e6 55%,#8b7cf6 100%);box-shadow:inset 0 0 0 3px #ffffff99,inset 0 -6px 12px #00000033,0 4px 18px #4fd0e677}
+.t1 .ribbon i{background:#8a5a30}.t1 .ribbon i:last-child{background:#6d4524}
+.t2 .ribbon i{background:#78849b}.t2 .ribbon i:last-child{background:#5d687d}
+.t3 .ribbon i{background:#b4001e}.t3 .ribbon i:last-child{background:#8c0016}
+.t4 .ribbon i{background:#5b46c9}.t4 .ribbon i:last-child{background:#4433a0}
+
+/* brillo que barre la medalla desbloqueada */
+.t1 .disc::before,.t2 .disc::before,.t3 .disc::before,.t4 .disc::before{
+  content:'';position:absolute;inset:0;border-radius:50%;overflow:hidden;
+  background:linear-gradient(115deg,transparent 38%,#ffffff85 47%,transparent 56%);
+  background-size:250% 250%;animation:shine 4.5s ease-in-out infinite}
+@keyframes shine{0%,72%{background-position:130% 130%}88%,100%{background-position:-30% -30%}}
+.t4 .disc{animation:float 3.2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+
+/* estrellitas de grado */
+.stars{margin-top:.35rem;font-size:.6rem;letter-spacing:1px;color:var(--gold);height:.8rem}
+.stars b{opacity:.22}
+.tn{font-size:.72rem;margin:.15rem 0 .35rem;line-height:1.2}
+.tsub{font-size:.62rem;color:var(--mut);margin-top:.28rem}
 .mbar{height:5px;background:#0e1a2e;border-radius:99px;overflow:hidden}
 .mbar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .4s}
 /* misiones */
@@ -615,8 +649,11 @@ function paintHome(){
   $('medalGrid').innerHTML=TROPHIES.map(tr=>{
     const k=tierOf(tr),val=tr.v(),next=tr.t[k];
     const p=next?Math.min(100,val/next*100):100;
-    return `<div class="trophy ${k?'got':''}">
-      <div class="tico">${tr.ic}<span class="tt">${k?TIER[k-1]:''}</span></div>
+    const stars=[0,1,2,3].map(i=>i<k?'★':'<b>★</b>').join('');
+    return `<div class="trophy t${k} ${k?'':'locked'}" title="${tr.n} — ${k?TIERN[k-1]:'sin desbloquear'}">
+      <div class="ribbon"><i></i><i></i></div>
+      <div class="disc">${k?tr.ic:'🔒'}</div>
+      <div class="stars">${stars}</div>
       <div class="tn">${tr.n}</div>
       <div class="mbar"><i style="width:${p}%"></i></div>
       <div class="tsub">${next?`${val} / ${next} ${tr.u}`:`✨ ${val} ${tr.u}`}</div></div>`;
